@@ -1,0 +1,256 @@
+import Job from '../models/JobModel.js'
+import User from '../models/UserModel.js'
+import Application from '../models/AppModel.js'
+import cloudinary from '../config/cloudinaryConfig.js'
+
+
+// Get all jobs
+export const getAllJobs = async (req,res) => {
+    try{
+        const jobs = await Job.find() ;
+
+        res.status(200).json({
+            success: true,
+            jobs
+        })
+
+    }catch(err){
+        res.status(500).json({
+            success: false,
+            message: err.message
+        })
+    }                
+}
+
+// Get all Users
+export const getAllUsers = async (req,res) => {
+    try{
+        const users = await User.find() ;
+
+        res.status(200).json({
+            success: true,
+            users
+        })
+
+    }catch(err){
+        res.status(500).json({
+            success: false,
+            message: err.message
+        })
+    }
+}
+
+// Get all applications
+export const getAllApp = async (req,res) => {
+    try{
+        const applications = await Application.find().populate("job applicant") ;
+
+        res.status(200).json({
+            success: true,
+            applications
+        })
+
+    }catch(err){
+        res.status(500).json({
+            success: false,
+            message: err.message
+        })
+    }
+}
+
+// Update Application Status
+export const updateApplication = async (req,res) => {
+    try{
+
+        const application = await Application.findById(req.params.id) ;
+
+        application.status = req.body.status ;
+
+        await application.save() ;
+
+        res.status(200).json({
+            success: true,
+            message: "Application Updated"
+        })
+
+    }catch(err){
+        res.status(500).json({
+            success: false,
+            message: err.message
+        })
+    }
+}
+// Delete Application
+export const deleteApplication = async (req,res) => {
+    try{
+
+        const application = await Application.findByIdAndRemove(req.params.id) ;
+
+        res.status(200).json({
+            success: true ,
+            message: "Application Deleted"
+        })
+
+    }catch(err){
+        res.status(500).json({
+            success: false,
+            message: err.message
+        })
+    }
+}
+// Get Application
+export const getApplication = async (req,res) => {
+    try{
+        const application = await Application.findById(req.params.id).populate("job applicant") ;
+
+        res.status(200).json({
+            success: true,
+            application
+        })
+
+    }catch(err){
+        res.status(500).json({
+            success: false,
+            message: err.message
+        })
+    }
+}
+
+
+// Update User Role
+export const updateUser = async (req,res) => {
+    try{
+        const user = await User.findById(req.params.id) ;
+
+        user.role = req.body.role ;
+
+        await user.save() ;
+
+        res.status(200).json({
+            success: true,
+            message: "User Updated"
+        })
+
+    }catch(err){
+        res.status(500).json({
+            success: false,
+            message: err.message
+        })
+    }
+}
+
+// Delete User
+export const deleteUser = async (req,res) => {
+    try{
+        const user = await User.findByIdAndRemove(req.params.id) ;
+
+        res.status(200).json({
+            success: true,
+            message: "User Deleted"
+        })
+
+    }catch(err){
+        res.status(500).json({
+            success: false,
+            message: err.message
+        })
+    }
+}
+
+// Get User
+export const getUser = async (req,res) => {
+    try{
+        const user = await User.findById(req.params.id) ;
+
+        res.status(200).json({
+            success: true,
+            user
+        })
+
+    }catch(err){
+        res.status(500).json({
+            success: false,
+            message: err.message
+        })
+    }
+}
+
+
+// Update Job
+export const updateJob = async (req,res) => {
+    try{    
+
+        const job = await Job.findById(req.params.id) ;
+
+        const logoToDelete_Id = job.companyLogo.public_id ;
+
+        await cloudinary.v2.uploader.destroy(logoToDelete_Id) ;
+
+        const logo = req.body.companyLogo  ;
+
+        const myCloud = await cloudinary.v2.uploader.upload(logo, {
+            folder: 'logo',
+            crop: "scale",
+        })
+
+        req.body.companyLogo = {
+            public_id: myCloud.public_id,
+            url: myCloud.secure_url
+        }
+
+        const updatedJob = await Job.findByIdAndUpdate(req.params.id, req.body, { new: true }) ;
+
+        
+
+        res.status(200).json({
+            success: true,
+            message: "Job Updated"
+        })
+
+    }catch(err){
+        res.status(500).json({
+            success: false,
+            message: err.message
+        })
+    }
+}
+
+
+// Get Single Job
+export const getJob = async (req,res) => {
+    try{    
+
+        const job = await Job.findById(req.params.id)
+
+        res.status(200).json({
+            success: true,
+            job
+        })
+
+    }catch(err){
+        res.status(500).json({
+            success: false,
+            message: err.message
+        })
+    }
+}
+
+
+// Delete Single Job
+export const deleteJob = async (req,res) => {
+    try{    
+
+        const job = await Job.findByIdAndRemove(req.params.id)
+
+        res.status(200).json({
+            success: true,
+            message: "Job Deleted"
+        })
+
+    }catch(err){
+        res.status(500).json({
+            success: false,
+            message: err.message
+        })
+    }
+}
