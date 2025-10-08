@@ -1,6 +1,6 @@
-# JobLane : Job application portal project
+# CampusHire : Job application portal project
 
-### Installation of JobLane.
+### Installation of CampusHire.
 
 #### Setting up MERN Stack:
 
@@ -10,7 +10,7 @@ Follow the installation instructions for MongoDB, Express.js, React.js, and Node
 
 1. Clone the repository to your local machine:
     ```bash
-    git clone https://github.com/sujaltangde/JobLane.git 
+    git clone https://github.com/sujaltangde/CampusHire.git 
     ```
 
 2. Change into the frontend directory:

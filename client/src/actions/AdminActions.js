@@ -1,7 +1,6 @@
 import {
     getAllJobsRequest,getAllJobsSuccess,getAllJobsFail,
-    getAllUsersRequest,getAllUsersSuccess,getAllUsersFail,
-    getAllAppRequest,getAllAppSuccess,getAllAppFail,
+    getAllUsersRequest,getAllUsersSuccess,getAllUsersFail,    
     getAppRequest, getAppSuccess, getAppFail,
     updateAppRequest, updateAppSuccess, updateAppFail,
     deleteAppRequest, deleteAppSuccess, deleteAppFail,
@@ -12,8 +11,13 @@ import {
     updateJobRequest, updateJobSuccess, updateJobFail,
     deleteJobRequest, deleteJobSuccess, deleteJobFail
 } from '../slices/AdminSlice'
+import {allApplicationsRequest, allApplicationsSuccess, allApplicationsFail, applicationDetailsSuccess, applicationDetailsFail, applicationDetailsRequest} from '../slices/ApplicationSlice'
 import axios from 'axios'
 import {toast} from 'react-toastify'
+import { getMyJobs } from './JobActions';
+import { jobDetailsSuccess } from '../slices/JobSlice';
+
+const API_BASE_URL = "http://localhost:3000/api/v1"; 
 
 export const getAllJobsAdmin = () => async (dispatch) => {
     try{
@@ -55,28 +59,31 @@ export const getAllUsersAdmin = () => async (dispatch) => {
 
 
 export const getAllAppAdmin = () => async (dispatch) => {
-    try{
-        dispatch(getAllAppRequest()) ;
-            
-        const config = {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('userToken')}`
-            } 
-        }
+  try {
+    dispatch(allApplicationsRequest());
 
-        const {data} = await axios.get("http://localhost:3000/api/v1/admin/allApp",config) ;
+    const config = {
+      headers: { Authorization: `Bearer ${localStorage.getItem("userToken")}` },
+    };
 
-        dispatch(getAllAppSuccess(data.applications))
+    // 🔥 switch to recruiter route
+    const { data } = await axios.get(
+      "http://localhost:3000/api/v1/admin/allApplications",
+      config
+    );
 
-    }catch(err){
-        dispatch(getAllAppFail(err.response.data.message)) ;
-    }
-}
+    dispatch(allApplicationsSuccess(data.applications));
+  } catch (err) {
+    const message =
+      err.response?.data?.message || "Unable to fetch applications.";
+    dispatch(allApplicationsFail(message));
+  }
+};
 
 
 export const getAppData = (id) => async (dispatch) => {
     try{
-        dispatch(getAppRequest())    
+        dispatch(applicationDetailsRequest())    
         
         const config = {
             headers: {
@@ -85,11 +92,10 @@ export const getAppData = (id) => async (dispatch) => {
         }
 
         const {data} = await axios.get(`http://localhost:3000/api/v1/admin/getApplication/${id}`,config)
-        
-        dispatch(getAppSuccess(data.application))
+        dispatch(applicationDetailsSuccess(data.application))
 
     }catch(err){
-        dispatch(getAppFail(err.response.data.message))
+        dispatch(applicationDetailsFail(err.response.data.message))
     }
 }
 
@@ -113,7 +119,7 @@ export const updateApplication = (id,dataBody) => async (dispatch) => {
         
          dispatch(updateAppSuccess())
          dispatch(getAppData(id))
-         toast.success("Status Updated !") 
+         //toast.success("Status Updated !") 
         }
         
     }catch(err){
@@ -213,64 +219,80 @@ export const deleteUser = (id) => async (dispatch) => {
 
 
 export const getJobData = (id) => async (dispatch) => {
-    try{
-        dispatch(getJobRequest()) ;
+  try {
+    dispatch(getJobRequest());
 
-        const config = {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('userToken')}`
-            } 
-        }
+    const config = {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+      },
+    };
 
-        const {data} = await axios.get(`http://localhost:3000/api/v1/admin/getJob/${id}`,config) ;
+    const { data } = await axios.get(
+      `http://localhost:3000/api/v1/admin/getJob/${id}`,
+      config
+    );
+    dispatch(jobDetailsSuccess(data.job));
+  } catch (err) {
+    const message =
+      err.response?.data?.message || "Failed to load job details.";
+    dispatch(getJobFail(message));
+  }
+};
 
-        dispatch(getJobSuccess(data.job))
+export const updateJobData = (id, jobData) => async (dispatch) => {
+  try {
+    dispatch(updateJobRequest());
 
-    }catch(err){    
-        dispatch(getJobFail(err.response.data.message)) ;
-    }
-}
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+      },
+    };
 
-export const updateJobData = (id,jobData) => async (dispatch) => {
-    try{
-        dispatch(updateJobRequest()) ;
+    const { data } = await axios.put(
+      `http://localhost:3000/api/v1/admin/updateJob/${id}`,
+      jobData,
+      config
+    );
 
-        const config = {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('userToken')}`
-            } 
-        }
+    dispatch(updateJobSuccess());
+    //toast.success(data.message || "Job updated successfully!");
 
-        const {data} = await axios.put(`http://localhost:3000/api/v1/admin/updateJob/${id}`,jobData,config) ;
-
-        dispatch(updateJobSuccess())
-        dispatch(getAllJobsAdmin())
-        dispatch(getJobData(id)) 
-        toast.success("Job Updated Successfully !")
-
-    }catch(err){    
-        dispatch(updateJobFail(err.response.data.message)) ;
-    }
-}
+    // refresh recruiter’s job list
+    dispatch(getMyJobs());
+  } catch (err) {
+    const message =
+      err.response?.data?.message || "Failed to update job. Please try again.";
+    dispatch(updateJobFail(message));
+    toast.error(message);
+  }
+};
 
 
 export const deleteJobData = (id) => async (dispatch) => {
-    try{
-        dispatch(deleteJobRequest()) ;
+  try {
+    dispatch(deleteJobRequest());
 
-        const config = {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('userToken')}`
-            } 
-        }
+    const config = {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+      },
+    };
 
-        const {data} = await axios.delete(`http://localhost:3000/api/v1/admin/deleteJob/${id}`,config) ;
+    const { data } = await axios.delete(
+      `${API_BASE_URL}/admin/deleteJob/${id}`,
+      config
+    );
 
-        dispatch(deleteJobSuccess())
-        dispatch(getAllJobsAdmin())
-        toast.success("Job Deleted Successfully !")
-
-    }catch(err){    
-        dispatch(deleteJobFail(err.response.data.message)) ;
-    }
-}
+    dispatch(deleteJobSuccess());
+    dispatch(getMyJobs()); // ✅ fetch updated list
+    toast.success(data.message || "Job deleted successfully!");
+  } catch (err) {
+    const message =
+      err.response?.data?.message || "Failed to delete job. Please try again.";
+    dispatch(deleteJobFail(message));
+    toast.error(message);
+  }
+};

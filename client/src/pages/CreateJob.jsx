@@ -1,436 +1,353 @@
-import React, { useState, useEffect } from 'react'
-import { MetaData } from '../components/MetaData'
-import { Sidebar } from '../components/Sidebar'
-import { MdOutlineLocationOn, MdOutlineFeaturedPlayList, MdOutlineWorkOutline, MdWorkspacesOutline, MdAttachMoney, MdOutlineReceiptLong } from 'react-icons/md'
-import { BiImageAlt } from 'react-icons/bi'
-import { TbLoader2 } from 'react-icons/tb'
-import { BiBuilding } from 'react-icons/bi'
-import { useDispatch, useSelector } from 'react-redux'
-import { createJobPost } from '../actions/JobActions'
-import { RxCross1 } from 'react-icons/rx'
-
-
-
+import React, { useState } from "react";
+import { MetaData } from "../components/MetaData";
+import { useDispatch, useSelector } from "react-redux";
+import { createJobPost } from "../actions/JobActions";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import { TbLoader2 } from "react-icons/tb";
 
 export const CreateJob = () => {
+  const {me} = useSelector((state) => state.user || {});
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { loading } = useSelector((state) => state.job || {});
 
-  const { loading } = useSelector(state => state.job);
+  const [form, setForm] = useState({
+    title: "",
+    description: "",
+    location: "",
+    skillsRequired: "",
+    experience: "",
+    payType: "fixed",
+    payMin: "",
+    payMax: "",
+    category: "",
+    employmentType: "micro-gig",
+    durationWeeks: "",
+    hoursPerWeek: "",
+    remoteType: "remote",
+    eligibilityMinYear: "",
+    eligibilityMaxYear: "",
+    maxApplicants: "",
+    deadline: "",
+  });
 
-  const [sideTog, setSideTog] = useState(false)
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
 
-  const dispatch = useDispatch()
+  const resetForm = () => {
+    setForm({
+      title: "",
+      description: "",
+      location: "",
+      skillsRequired: "",
+      experience: "",
+      payType: "fixed",
+      payMin: "",
+      payMax: "",
+      category: "",
+      employmentType: "micro-gig",
+      durationWeeks: "",
+      hoursPerWeek: "",
+      remoteType: "remote",
+      eligibilityMinYear: "",
+      eligibilityMaxYear: "",
+      maxApplicants: "",
+      deadline: "",
+    });
+  };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [companyName, setCompanyName] = useState("");
-  const [location, setLocation] = useState("");
-  const [skillsRequired, setSkillsRequired] = useState("");
-  const [experience, setExperience] = useState("");
-  const [salary, setSalary] = useState("");
-  const [category, setCategory] = useState("");
-  const [employmentType, setEmploymentType] = useState("");
-
-  const [logo, setLogo] = useState("");
-  const [logoName, setLogoName] = useState("");
-
-
-
-
-
-
-
-  const logoChange = (e) => {
-    if (e.target.name === "logo") {
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (reader.readyState === 2) {
-          setLogo(reader.result);
-          setLogoName(e.target.files[0].name)
-        }
-      };
-
-      reader.readAsDataURL(e.target.files[0]);
+    const { title, description } = form;
+    if (!title || !description) {
+      toast.error("Please fill title and description");
+      return;
     }
-  }
 
+    const payload = {
+      ...form,
+      companyName: me?.companyName,
+      companyLogo: me?.companyLogo,
+      deadline: form.deadline ? new Date(form.deadline).toISOString() : null,
+      skillsRequired: form.skillsRequired
+        ? form.skillsRequired.split(",").map((s) => s.trim()).filter(Boolean)
+        : [],
+      payMin: form.payMin ? Number(form.payMin) : 0,
+      payMax: form.payMax ? Number(form.payMax) : 0,
+      durationWeeks: form.durationWeeks ? Number(form.durationWeeks) : 0,
+      hoursPerWeek: form.hoursPerWeek ? Number(form.hoursPerWeek) : 0,
+      eligibilityMinYear: form.eligibilityMinYear
+        ? Number(form.eligibilityMinYear)
+        : undefined,
+      eligibilityMaxYear: form.eligibilityMaxYear
+        ? Number(form.eligibilityMaxYear)
+        : undefined,
+      maxApplicants: form.maxApplicants ? Number(form.maxApplicants) : undefined,
+    };
 
-
-  const postHandler = (e) => {
-    e.preventDefault()
-    const skillsArr = skillsRequired.split(",")
-    const data = { title, description, companyName, location, logo, skillsRequired: skillsArr, experience, salary, category, employmentType }
-
-    dispatch(createJobPost(data))
-
-    setTitle("");
-    setDescription("");
-    setCompanyName("");
-    setLocation("");
-    setSalary("");
-    setExperience("");
-    setSkillsRequired("")
-    setCategory("");
-    setEmploymentType("");
-    setLogo("");
-    setLogoName("")
-  }
-
+    await dispatch(createJobPost(payload));
+    resetForm();
+    navigate("/admin/myJobs");
+  };
 
   return (
     <>
+      <MetaData title="Post a Gig | Recruiter" />
+      <div className="bg-gray-950 min-h-screen pt-14 md:px-20 px-4 text-white">
+        <div className="max-w-5xl mx-auto pb-12">
+          <h1 className="text-3xl font-semibold mb-6">Post a New Gig</h1>
 
-      <MetaData title="Post Job" />
-      <div className='bg-gray-950 min-h-screen pt-12  md:px-20 px-3  text-white'>
-
-
-        <div className="pt-4 fixed left-0 z-20 pl-0">
-          <div onClick={(() => setSideTog(!sideTog))} className='cursor-pointer blueCol px-3 py-2' size={44} >
-            {!sideTog ? "Menu" : <RxCross1 />}
-          </div>
-        </div>
-
-        <Sidebar sideTog={sideTog} />
-
-
-        <div className=' flex justify-center w-full items-start pt-6'>
-
-
-          <form onSubmit={postHandler} className=' md:flex hidden  shadow-gray-700  w-full md:mx-0 mx-8' action="">
-            <div className='flex flex-col w-full justify-start items-start pt-4 gap-3'>
-              <div className='text-4xl pb-1 font-medium border-b border-gray-500 w-full'>
-                Post Job
-              </div>
-              <div className='flex gap-3 pt-3'>
-                {/* Job Title */}
-                <div className='bg-white flex justify-center items-center'>
-                  <div className='text-gray-600 px-2'>
-                    <MdOutlineWorkOutline size={20} />
-                  </div>
-                  <input
-                    value={title} onChange={(e) => setTitle(e.target.value)}
-                    required placeholder='Job Title' type="text" className='outline-none bold-placeholder w-full text-black px-1 pr-3 py-2' />
-                </div>
-
-
-
-                {/* Company Name */}
-                <div className='bg-white flex justify-center items-center'>
-                  <div className='text-gray-600 px-2'>
-                    <BiBuilding size={20} />
-                  </div>
-                  <input
-                    value={companyName} onChange={(e) => setCompanyName(e.target.value)}
-                    required placeholder='Company Name' type="text" className='outline-none bold-placeholder w-full text-black px-1 pr-3 py-2' />
-                </div>
-
-
-
-                {/* Company Logo */}
-                <div>
-                  <div className='bg-white flex w-[15.2rem] justify-center items-center'>
-                    <div className='text-gray-600 px-2'>
-                      {
-                        logo.length !== 0 ?
-                          <img src={logo} className='w-[3em]' alt="" /> :
-                          <BiImageAlt size={20} />
-                      }
-                    </div>
-                    <label htmlFor='logo' className='outline-none w-full cursor-pointer text-black px-1 pr-3 py-2 '>
-                      {logoName.length === 0 ? <span className='text-gray-500 font-medium'>Select Company Logo...</span>
-                        : logoName}
-                    </label>
-                    <input id='logo' name='logo' required
-                      onChange={logoChange}
-                      placeholder='Logo' accept="image/*" type="file" className='outline-none  w-full hidden text-black px-1 pr-3 py-2' />
-
-
-                  </div>
-                  {/* <p className='bg-gray-950 text-white text-xs'>Please select Image file</p> */}
-                </div>
-
-              </div>
-              <div className='flex gap-3'>
-                {/* Experience */}
-                <div className='bg-white flex justify-center items-center'>
-                  <div className='text-gray-600 px-2'>
-                    <MdOutlineReceiptLong size={20} />
-                  </div>
-                  <input
-                    value={experience} onChange={(e) => setExperience(e.target.value)}
-                    required placeholder='Experience' type="text" className='outline-none bold-placeholder w-full text-black px-1 pr-3 py-2' />
-                </div>
-
-
-                {/* Location */}
-                <div className='bg-white flex justify-center items-center'>
-                  <div className='text-gray-600 px-2'>
-                    <MdOutlineLocationOn size={20} />
-                  </div>
-                  <input
-                    value={location} onChange={(e) => setLocation(e.target.value)}
-                    required placeholder='Location' type="text" className='outline-none bold-placeholder w-full text-black px-1 pr-3 py-2' />
-                </div>
-
-
-                {/* Salary */}
-                <div className='bg-white flex justify-center items-center'>
-                  <div className='text-gray-600 px-2'>
-                    <MdAttachMoney size={20} />
-                  </div>
-                  <input
-                    value={salary} onChange={(e) => setSalary(e.target.value)}
-                    required placeholder='Salary' type="text" className='outline-none bold-placeholder w-full text-black px-1 pr-3 py-2' />
-                </div>
-
-              </div>
-
-              <div className='flex w-[48rem] gap-3'>
-                {/* Job Description */}
-                <div className='bg-white w-full flex justify-center items-center'>
-                  <div className='text-gray-600 md:pb-12 pb-8 px-2'>
-                    <MdOutlineFeaturedPlayList size={20} />
-                  </div>
-                  <textarea
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    placeholder='Job Description' type="text" className='outline-none w-full text-black bold-placeholder px-1 pr-3 py-2' />
-                </div>
-
-              </div>
-
-              <div className='flex gap-3 w-[48rem]'>
-                {/* Skills Required */}
-                <div className='bg-white w-full flex justify-center items-center'>
-                  <div className='text-gray-600 md:pb-12 pb-8 px-2'>
-                    <MdWorkspacesOutline size={20} />
-                  </div>
-                  <textarea
-                    value={skillsRequired} onChange={(e) => setSkillsRequired(e.target.value)}
-                    placeholder='Required Skills' type="text" className='outline-none w-full text-black bold-placeholder px-1 pr-3 py-2' />
-                </div>
-
-              </div>
-              <div className='flex gap-3'>
-                {/* Category */}
-                <div className='bg-white flex justify-center items-center'>
-
-
-                  <select required onChange={(e) => setCategory(e.target.value)} value={category} name="" id="large" className="block w-full px-6 py-2 text-base text-gray-900 border border-gray-300  bg-gray-50 dark:bg-white dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-900 ">
-                    <option selected value="">Select Category</option>
-                    <option value="Technology">Technology</option>
-                    <option value="Marketing">Marketing</option>
-                    <option value="Finance">Finance</option>
-                    <option value="Sales">Sales</option>
-                    <option value="Legal">Legal</option>
-                  </select>
-                </div>
-
-
-                {/* Employment Type */}
-                <div className='bg-white flex justify-center items-center'>
-
-
-                  <select required onChange={(e) => setEmploymentType(e.target.value)} value={employmentType} name="" id="large" className="block w-full px-6 py-2 text-base text-gray-900 border border-gray-300  bg-gray-50 dark:bg-white dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-900 ">
-                    <option selected value="">Select Employment Type</option>
-                    <option value="full-time">Full-time</option>
-                    <option value="part-time">Part-time</option>
-                    <option value="contract">Contract</option>
-                    <option value="internship">Internship</option>
-                  </select>
-
-
-
-
-                </div>
-
-
-              </div>
-              <div className='flex w-full'>
-
-                <button className='blueCol w-[20rem] justify-center items-center flex px-4 py-2'>
-                  {loading ? <TbLoader2 className='animate-spin' size={24} /> : "Post Job"}
-                </button>
-
-              </div>
-
-
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Title */}
+            <div>
+              <label className="block text-sm text-gray-300 mb-1">Job Title</label>
+              <input
+                name="title"
+                value={form.title}
+                onChange={handleChange}
+                required
+                placeholder="e.g. Frontend Developer"
+                className="w-full px-3 py-2 text-black rounded outline-none"
+              />
             </div>
 
-          </form>
+            {/* Description */}
+            <div>
+              <label className="block text-sm text-gray-300 mb-1">Description</label>
+              <textarea
+                name="description"
+                value={form.description}
+                onChange={handleChange}
+                required
+                placeholder="Describe the job responsibilities and expectations"
+                rows="5"
+                className="w-full px-3 py-2 text-black rounded outline-none resize-y"
+              ></textarea>
+            </div>
 
-
-
-
-          <form onSubmit={postHandler} className=' md:hidden flex md:w-1/3 shadow-gray-700  w-full md:mx-0 mx-8' action="">
-
-            <div className='md:px-10 px-2 pt-4 pb-20 w-full flex flex-col gap-4'>
-              <div className='text-center border-gray-500 border-b'>
-                <p className='text-4xl  font-medium'>Post Job</p>
-              </div>
-
-              {/* Job Title */}
-              <div className='bg-white flex justify-center items-center'>
-                <div className='text-gray-600 px-2'>
-                  <MdOutlineWorkOutline size={20} />
-                </div>
-                <input
-                  value={title} onChange={(e) => setTitle(e.target.value)}
-                  required placeholder='Job Title' type="text" className='outline-none bold-placeholder w-full text-black px-1 pr-3 py-2' />
-              </div>
-
-
-
-              {/* Job Description */}
-              <div className='bg-white flex justify-center items-center'>
-                <div className='text-gray-600 md:pb-12 pb-8 px-2'>
-                  <MdOutlineFeaturedPlayList size={20} />
-                </div>
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder='Job Description' type="text" className='outline-none w-full text-black bold-placeholder px-1 pr-3 py-2' />
-              </div>
-
-
-
-              {/* Company Name */}
-              <div className='bg-white flex justify-center items-center'>
-                <div className='text-gray-600 px-2'>
-                  <BiBuilding size={20} />
-                </div>
-                <input
-                  value={companyName} onChange={(e) => setCompanyName(e.target.value)}
-                  required placeholder='Company Name' type="text" className='outline-none bold-placeholder w-full text-black px-1 pr-3 py-2' />
-              </div>
-
-
-
-              {/* Company Logo */}
+            {/* Row 1 */}
+            <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <div className='bg-white flex justify-center items-center'>
-                  <div className='text-gray-600 px-2'>
-                    {
-                      logo.length !== 0 ?
-                        <img src={logo} className='w-[3em]' alt="" /> :
-                        <BiImageAlt size={20} />
-                    }
-                  </div>
-                  <label htmlFor='logo' className='outline-none w-full cursor-pointer text-black px-1 pr-3 py-2 '>
-                    {logoName.length === 0 ? <span className='text-gray-500 font-medium'>Select Company Logo...</span>
-                      : logoName}
-                  </label>
-                  <input id='logo' name='logo' required
-                    onChange={logoChange}
-                    placeholder='Logo' accept="image/*" type="file" className='outline-none  w-full hidden text-black px-1 pr-3 py-2' />
-
-
-                </div>
-              </div>
-
-
-
-              {/* Location */}
-              <div className='bg-white flex justify-center items-center'>
-                <div className='text-gray-600 px-2'>
-                  <MdOutlineLocationOn size={20} />
-                </div>
+                <label className="block text-sm text-gray-300 mb-1">Location</label>
                 <input
-                  value={location} onChange={(e) => setLocation(e.target.value)}
-                  required placeholder='Location' type="text" className='outline-none bold-placeholder w-full text-black px-1 pr-3 py-2' />
+                  name="location"
+                  value={form.location}
+                  onChange={handleChange}
+                  placeholder="e.g. Mumbai or Remote"
+                  className="w-full px-3 py-2 text-black rounded outline-none"
+                />
               </div>
-
-              {/* Skills Required */}
-              <div className='bg-white flex justify-center items-center'>
-                <div className='text-gray-600 md:pb-12 pb-8 px-2'>
-                  <MdWorkspacesOutline size={20} />
-                </div>
-                <textarea
-                  value={skillsRequired} onChange={(e) => setSkillsRequired(e.target.value)}
-                  placeholder='Required Skills' type="text" className='outline-none w-full text-black bold-placeholder px-1 pr-3 py-2' />
-              </div>
-
-
-              {/* Experience */}
-              <div className='bg-white flex justify-center items-center'>
-                <div className='text-gray-600 px-2'>
-                  <MdOutlineReceiptLong size={20} />
-                </div>
+              <div>
+                <label className="block text-sm text-gray-300 mb-1">Category</label>
                 <input
-                  value={experience} onChange={(e) => setExperience(e.target.value)}
-                  required placeholder='Experience' type="text" className='outline-none bold-placeholder w-full text-black px-1 pr-3 py-2' />
+                  name="category"
+                  value={form.category}
+                  onChange={handleChange}
+                  placeholder="e.g. Technology, Marketing"
+                  className="w-full px-3 py-2 text-black rounded outline-none"
+                />
               </div>
+            </div>
 
-
-              {/* Category */}
-              <div className='bg-white flex justify-center items-center'>
-
-
-                <select required onChange={(e) => setCategory(e.target.value)} value={category} name="" id="large" className="block w-full px-6 py-2 text-base text-gray-900 border border-gray-300  bg-gray-50 dark:bg-white dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-900 ">
-                  <option selected value="">Select Category</option>
-                  <option value="full-time">Technology</option>
-                  <option value="part-time">Marketing</option>
-                  <option value="contract">Finance</option>
-                  <option value="internship">Sales</option>
-                  <option value="internship">Legal</option>
-                </select>
-              </div>
-
-
-              {/* Salary */}
-              <div className='bg-white flex justify-center items-center'>
-                <div className='text-gray-600 px-2'>
-                  <MdAttachMoney size={20} />
-                </div>
-
+            {/* Row 2 */}
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm text-gray-300 mb-1">Experience</label>
                 <input
-                  value={salary} onChange={(e) => setSalary(e.target.value)}
-                  required placeholder='Salary' type="text" className='outline-none bold-placeholder w-full text-black px-1 pr-3 py-2' />
+                  name="experience"
+                  value={form.experience}
+                  onChange={handleChange}
+                  placeholder="e.g. 0-1 years"
+                  className="w-full px-3 py-2 text-black rounded outline-none"
+                />
               </div>
-
-
-              {/* Employment Type */}
-              <div className='bg-white flex justify-center items-center'>
-
-
-                <select required onChange={(e) => setEmploymentType(e.target.value)} value={employmentType} name="" id="large" className="block w-full px-6 py-2 text-base text-gray-900 border border-gray-300  bg-gray-50 dark:bg-white dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-900 ">
-                  <option selected value="">Select Employment Type</option>
-                  <option value="full-time">Full-time</option>
+              <div>
+                <label className="block text-sm text-gray-300 mb-1">Employment Type</label>
+                <select
+                  name="employmentType"
+                  value={form.employmentType}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 text-black rounded outline-none"
+                >
+                  <option value="micro-gig">Micro-gig</option>
+                  <option value="freelance">Freelance</option>
+                  <option value="internship">Internship</option>
                   <option value="part-time">Part-time</option>
                   <option value="contract">Contract</option>
-                  <option value="internship">Internship</option>
+                  <option value="full-time">Full-time</option>
                 </select>
-
-
-
-
               </div>
-
-
-
-
-
-
-
-
-
-              <div>
-                <button disabled={loading} className='blueCol flex justify-center items-center px-8 w-full py-2 font-semibold' >
-                  {loading ? <TbLoader2 className='animate-spin' size={24} /> : "Post Job"}</button>
-              </div>
-
             </div>
 
+            {/* Row 3 */}
+            <div className="grid md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm text-gray-300 mb-1">Pay Type</label>
+                <select
+                  name="payType"
+                  value={form.payType}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 text-black rounded outline-none"
+                >
+                  <option value="fixed">Fixed</option>
+                  <option value="hourly">Hourly</option>
+                  <option value="stipend">Stipend</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm text-gray-300 mb-1">Pay Min</label>
+                <input
+                  name="payMin"
+                  value={form.payMin}
+                  onChange={handleChange}
+                  type="number"
+                  placeholder="e.g. 2000"
+                  className="w-full px-3 py-2 text-black rounded outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-300 mb-1">Pay Max</label>
+                <input
+                  name="payMax"
+                  value={form.payMax}
+                  onChange={handleChange}
+                  type="number"
+                  placeholder="e.g. 5000"
+                  className="w-full px-3 py-2 text-black rounded outline-none"
+                />
+              </div>
+            </div>
 
+            {/* Remote Type & Duration */}
+            <div className="grid md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm text-gray-300 mb-1">Remote Type</label>
+                <select
+                  name="remoteType"
+                  value={form.remoteType}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 text-black rounded outline-none"
+                >
+                  <option value="remote">Remote</option>
+                  <option value="on-site">On-site</option>
+                  <option value="hybrid">Hybrid</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm text-gray-300 mb-1">Duration (weeks)</label>
+                <input
+                  name="durationWeeks"
+                  value={form.durationWeeks}
+                  onChange={handleChange}
+                  type="number"
+                  placeholder="e.g. 4"
+                  className="w-full px-3 py-2 text-black rounded outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-300 mb-1">Hours / Week</label>
+                <input
+                  name="hoursPerWeek"
+                  value={form.hoursPerWeek}
+                  onChange={handleChange}
+                  type="number"
+                  placeholder="e.g. 10"
+                  className="w-full px-3 py-2 text-black rounded outline-none"
+                />
+              </div>
+            </div>
 
+            {/* Skills */}
+            <div>
+              <label className="block text-sm text-gray-300 mb-1">
+                Skills Required (comma separated)
+              </label>
+              <input
+                name="skillsRequired"
+                value={form.skillsRequired}
+                onChange={handleChange}
+                placeholder="e.g. React, Node, Firebase"
+                className="w-full px-3 py-2 text-black rounded outline-none"
+              />
+            </div>
+
+            {/* Eligibility */}
+            <div className="grid md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm text-gray-300 mb-1">
+                  Eligibility Min Year
+                </label>
+                <input
+                  name="eligibilityMinYear"
+                  value={form.eligibilityMinYear}
+                  onChange={handleChange}
+                  type="number"
+                  placeholder="1"
+                  className="w-full px-3 py-2 text-black rounded outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-300 mb-1">
+                  Eligibility Max Year
+                </label>
+                <input
+                  name="eligibilityMaxYear"
+                  value={form.eligibilityMaxYear}
+                  onChange={handleChange}
+                  type="number"
+                  placeholder="4"
+                  className="w-full px-3 py-2 text-black rounded outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-300 mb-1">Max Applicants</label>
+                <input
+                  name="maxApplicants"
+                  value={form.maxApplicants}
+                  onChange={handleChange}
+                  type="number"
+                  placeholder="e.g. 50"
+                  className="w-full px-3 py-2 text-black rounded outline-none"
+                />
+              </div>
+            </div>
+
+            {/* Deadline */}
+            <div>
+              <label className="block text-sm text-gray-300 mb-1">Deadline</label>
+              <input
+                name="deadline"
+                value={form.deadline}
+                onChange={handleChange}
+                type="date"
+                className="w-full px-3 py-2 text-black rounded outline-none"
+              />
+            </div>
+
+            {/* Submit */}
+            <div className="pt-6 flex gap-3">
+              <button
+                type="submit"
+                disabled={loading}
+                className="blueCol px-6 py-2 rounded font-semibold inline-flex items-center gap-2"
+              >
+                {loading ? <TbLoader2 className="animate-spin" size={18} /> : "Post Job"}
+              </button>
+              <button
+                type="button"
+                onClick={resetForm}
+                className="px-5 py-2 border border-gray-600 rounded text-gray-300"
+              >
+                Reset
+              </button>
+            </div>
           </form>
-
         </div>
-
-
       </div>
-
-
     </>
-  )
-}
+  );
+};

@@ -87,7 +87,6 @@ export const me = () => async (dispatch) => {
 
         const { data } = await axios.get("http://localhost:3000/api/v1/me", config);
         localStorage.setItem("role", data.user.role)
-
         dispatch(getMeSuccess(data.user))
 
     } catch (err) {

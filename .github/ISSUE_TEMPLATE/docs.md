@@ -1,6 +1,6 @@
 ---
 name: 📝 Documentation
-about: Propose changes and improvements to JobLane Docs.
+about: Propose changes and improvements to CampusHire Docs.
 title: '📝[Docs]: '
 labels: 'enhancement'
 assignees: ''

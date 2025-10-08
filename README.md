@@ -1,14 +1,14 @@
-<h1 align="center" id="title">JobLane</h1>
+<h1 align="center" id="title">CampusHire</h1>
 
-<p align="center"><img src="https://socialify.git.ci/sujaltangde/JobLane/image?forks=1&issues=1&language=1&name=1&owner=1&pulls=1&stargazers=1&theme=Dark" alt="JobLane" width="640" height="320" /></p>
+<p align="center"><img src="https://socialify.git.ci/sujaltangde/CampusHire/image?forks=1&issues=1&language=1&name=1&owner=1&pulls=1&stargazers=1&theme=Dark" alt="CampusHire" width="640" height="320" /></p>
 
-[![Hits](https://hits.sh/github.com/sujaltangde/JobLane.svg?color=116acc)](https://hits.sh/github.com/sujaltangde/JobLane/)
+[![Hits](https://hits.sh/github.com/sujaltangde/CampusHire.svg?color=116acc)](https://hits.sh/github.com/sujaltangde/CampusHire/)
 
 <p id="description">Full Stack Job application portal built using MERN stack, Focusing on simplifying the job applications.</p>
 
 <h2>🚀 Demo</h2>
 
-[Website](https://joblane.vercel.app/)<br />
+[Website](https://CampusHire.vercel.app/)<br />
 
   
   
@@ -39,7 +39,7 @@ To get started with the assignment project, follow these steps:
 
 1. Clone the repository to your local machine:
     ```bash
-    git clone https://github.com/sujaltangde/JobLane.git 
+    git clone https://github.com/sujaltangde/CampusHire.git 
     ```
 
 2. Change into the frontend directory:

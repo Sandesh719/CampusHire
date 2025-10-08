@@ -45,7 +45,7 @@ export const Home = () => {
 
   return (
     <>
-      <MetaData title="JobLane" />
+      <MetaData title="CampusHire" />
       <div className="min-h-screen md:px-20 px-3 pt-14 flex text-white bg-gray-950">
         <div className="w-full flex pt-28 flex-col justify-start items-center gap-4">
 
@@ -120,7 +120,7 @@ export const Home = () => {
           <Testimonials />
 
           <div className="pt-[7rem] pb-[10rem] md:px-[14rem] px-[1rem] text-center">
-            <p>Discover the Power of Possibility with JobLane: Where Your Professional Journey Takes Flight, Guided by a Network of Diverse Opportunities!</p>
+            <p>Discover the Power of Possibility with CampusHire: Where Your Professional Journey Takes Flight, Guided by a Network of Diverse Opportunities!</p>
           </div>
         </div>
       </div>
