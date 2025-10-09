@@ -191,79 +191,113 @@ export const createJob = async (req, res) => {
 
 export const allJobs = async (req, res) => {
   try {
-    // Filters via query params
+    // --- 1. Extract query params
     const {
       q, // text query
-      studentGigs, // 'true' or 'false'
+      studentGigs, // 'true' | 'false'
       payMin, payMax,
       minYear, maxYear,
-      skills, // comma separated
+      skills, // comma separated list
       employmentType,
       remoteType,
-      sort = 'recent', // recent | payDesc | payAsc | deadline
+      sort = "recent", // recent | payDesc | payAsc | deadline
       page = 1,
-      limit = 12
+      limit = 12,
     } = req.query;
 
-    const filter = {};
+    // --- 2. Build base filter
+    const filter = {
+      isApproved: true,
+      status: "active", // ✅ ensure only active listings
+    };
 
-    // By default show only approved student gigs; admin/admin routes can override this later
-    filter.isApproved = true;
-
-    if (typeof studentGigs !== 'undefined') {
-      if (studentGigs === 'true') filter.isStudentGig = true;
-      else if (studentGigs === 'false') filter.isStudentGig = false;
+    // By default, show student gigs only
+    if (typeof studentGigs !== "undefined") {
+      filter.isStudentGig = studentGigs === "true";
     } else {
-      // default: show student gigs (your portal focuses on students)
       filter.isStudentGig = true;
     }
 
-    if (payMin) filter.payMax = { $gte: Number(payMin) };
-    if (payMax) filter.payMin = { ...(filter.payMin || {}), $lte: Number(payMax) };
+    // --- 3. Pay range filtering
+    if (payMin)
+      filter.payMax = { $gte: Number(payMin) };
+    if (payMax)
+      filter.payMin = { ...(filter.payMin || {}), $lte: Number(payMax) };
 
-    if (minYear) filter['eligibility.minYear'] = { $lte: Number(minYear) };
-    if (maxYear) filter['eligibility.maxYear'] = { $gte: Number(maxYear) };
+    // --- 4. Eligibility (year)
+    if (minYear)
+      filter["eligibility.minYear"] = { $lte: Number(minYear) };
+    if (maxYear)
+      filter["eligibility.maxYear"] = { $gte: Number(maxYear) };
 
+    // --- 5. Employment type and location type
     if (employmentType) filter.employmentType = employmentType;
     if (remoteType) filter.remoteType = remoteType;
 
+    // --- 6. Skills filtering
     if (skills) {
-      const skillArr = skills.split(',').map(s => s.trim()).filter(Boolean);
-      if (skillArr.length) filter.skillsRequired = { $all: skillArr };
+      const skillArr = skills
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      if (skillArr.length)
+        filter.skillsRequired = { $all: skillArr };
     }
 
-    // Text search
+    // --- 7. Text search (q)
     let query = Job.find(filter);
-    if (q) {
-      query = Job.find({ $text: { $search: q }, ...filter });
+    if (q && q.trim()) {
+      query = Job.find({
+        $text: { $search: q },
+        ...filter,
+      });
     }
 
-    // Sorting
-    if (sort === 'payDesc') query = query.sort({ payMax: -1 });
-    else if (sort === 'payAsc') query = query.sort({ payMin: 1 });
-    else if (sort === 'deadline') query = query.sort({ deadline: 1 });
-    else query = query.sort({ createdAt: -1 });
+    // --- 8. Sorting options
+    switch (sort) {
+      case "payDesc":
+        query = query.sort({ payMax: -1 });
+        break;
+      case "payAsc":
+        query = query.sort({ payMin: 1 });
+        break;
+      case "deadline":
+        query = query.sort({ deadline: 1 });
+        break;
+      default:
+        query = query.sort({ createdAt: -1 });
+    }
 
-    // Pagination
+    // --- 9. Pagination logic
     const pageNum = Number(page) || 1;
     const perPage = Math.min(Number(limit) || 12, 100);
     const skip = (pageNum - 1) * perPage;
 
-    const total = await Job.countDocuments(filter);
-    const jobs = await query.skip(skip).limit(perPage).populate('postedBy', 'name companyName companyLogo verifiedRecruiter');
+    // Parallel queries (for performance)
+    const [total, jobs] = await Promise.all([
+      Job.countDocuments(filter),
+      query
+        .skip(skip)
+        .limit(perPage)
+        .populate(
+          "postedBy",
+          "name email companyName companyLogo verifiedRecruiter"
+        ),
+    ]);
 
+    // --- 10. Respond
     res.status(200).json({
       success: true,
       total,
       page: pageNum,
       perPage,
-      jobs
+      jobs,
     });
   } catch (err) {
-    console.error(err);
+    console.error("allJobs error:", err);
     res.status(500).json({
       success: false,
-      message: err.message
+      message: err.message || "Server error fetching jobs",
     });
   }
 };

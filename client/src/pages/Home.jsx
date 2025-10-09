@@ -52,11 +52,11 @@ export const Home = () => {
           {/* Hero */}
           <div className="flex md:flex-row flex-col items-center justify-center md:gap-10 gap-1">
             <div className="md:text-8xl text-6xl titleT">CAMPUS HIRE</div>
-            <div className="flex justify-center items-center pt-1">
+            {/*<div className="flex justify-center items-center pt-1">
               <Link to="/jobs" className="font-semibold md:text-2xl text-lg blueCol md:py-3 py-2 px-6 md:px-10">
                 Browse Gigs
               </Link>
-            </div>
+            </div>*/}
           </div>
 
           <p className="md:text-xl text-sm">Your <span className="text-yellow-500">gateway</span> to experience the real world.</p>
