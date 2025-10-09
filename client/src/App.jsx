@@ -16,12 +16,12 @@ import { Register } from './pages/Register'
 import { JobDetails } from './pages/JobDetails'
 import { ChangePassword } from './pages/ChangePassword'
 import { useSelector, useDispatch } from 'react-redux'
-import { logOrNot, me } from './actions/UserActions'
+import { logOrNot, me } from './actions/UserActions' // FIXED: Removed ../
 import { EditProfile } from './pages/EditProfile'
 import { DeleteAccount } from './pages/DeleteAccount'
 import { Dashboard } from './pages/Dashboard'
 import { CreateJob } from './pages/CreateJob'
-import { getAllJobs } from './actions/JobActions'
+import { getAllJobs } from './actions/JobActions' // FIXED: Removed ../
 import { JobsLayout } from './pages/JobsLayout'
 import { Application } from './pages/Application'
 import { ApplicationDetails } from './pages/ApplicationDetails'
@@ -39,6 +39,7 @@ import ScrollToTopWhenRouteChanges from './components/ScrollToTopOnRouteChange.j
 // Use the components that already exist under src/pages
 import { MyPostedJobs } from './pages/MyPostedJobs'
 import { ViewJobApplicants } from './pages/ViewJobApplicants'
+import { Portfolio } from './pages/Portfolio' // ADD THIS IMPORT
 
 function App() {
   const dispatch = useDispatch()
@@ -66,6 +67,7 @@ function App() {
 
   const isAdmin = () => localStorage.getItem('role') === 'recruiter' || localStorage.getItem('role') === 'admin'
   const isStudentOrAdmin = () => ['student', 'admin','recruiter'].includes(localStorage.getItem('role'))
+  const isStudent = () => localStorage.getItem('role') === 'student' // ADD THIS
 
   return (
     <>
@@ -93,6 +95,11 @@ function App() {
           <Route path='/JobsLayout' element={<JobsLayout />} />
           <Route path='/Application/:id' element={<Application />} />
           <Route path='/Application/Details/:id' element={<ApplicationDetails />} />
+        </Route>
+
+        {/* Protected: Students only - Portfolio */}
+        <Route element={<ProtectedRoute isAllowed={isStudent()} />}>
+          <Route path='/portfolio' element={<Portfolio />} />
         </Route>
 
         {/* Protected: admin / recruiter */}

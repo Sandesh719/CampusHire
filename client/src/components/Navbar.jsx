@@ -8,7 +8,7 @@ import {
   MdOutlineBusinessCenter,
   MdOutlineDashboard,
 } from 'react-icons/md';
-import { FaUserCircle, FaSave } from 'react-icons/fa';
+import { FaUserCircle, FaSave, FaBriefcase } from 'react-icons/fa';
 import { MdDoneAll } from 'react-icons/md';
 import { RiLogoutBoxFill } from 'react-icons/ri';
 import { toast } from 'react-toastify';
@@ -36,6 +36,7 @@ export const Navbar = () => {
   // 💡 Different menu items for recruiter and normal user
   const isRecruiter = me?.role === 'recruiter';
   const isAdmin = me?.role === 'admin';
+  const isStudent = me?.role === 'student';
 
   const NavLinks = () => (
     <>
@@ -44,14 +45,14 @@ export const Navbar = () => {
       </Link>
 
       {/* Students see gigs */}
-      {me?.role === 'student' && (
+      {isStudent && (
         <Link to="/jobs" className="cool-link">
           Gigs
         </Link>
       )}
 
       {/* Recruiters see Post Job + Applicants */}
-      {me?.role === 'recruiter' && (
+      {isRecruiter && (
         <>
           <Link to="/admin/postJob" className="cool-link">
             Post Gigs
@@ -68,9 +69,15 @@ export const Navbar = () => {
       <Link to="/about" className="cool-link">
         About
       </Link>
+      
+      {/* Portfolio link for students */}
+      {isStudent && (
+        <Link to="/portfolio" className="cool-link">
+          My Portfolio
+        </Link>
+      )}
     </>
-    );
-
+  );
 
   const UserMenu = () => (
     <Menu shadow="md" width={220}>
@@ -100,11 +107,6 @@ export const Navbar = () => {
         {/* Recruiter-specific items */}
         {isRecruiter ? (
           <>
-            {/*<Link to="/recruiter/post-job">
-              <Menu.Item icon={<MdOutlineBusinessCenter size={14} />}>
-                Post a Job
-              </Menu.Item>
-            </Link>*/}
             <Link to="/admin/myJobs">
               <Menu.Item icon={<MdDoneAll size={14} />}>
                 My Posted Jobs
@@ -113,7 +115,7 @@ export const Navbar = () => {
           </>
         ) : (
           <>
-            {/* Normal User */}
+            {/* Normal User (Student) */}
             <Link to="/applied">
               <Menu.Item icon={<MdDoneAll size={14} />}>
                 Applied Jobs
@@ -121,6 +123,10 @@ export const Navbar = () => {
             </Link>
             <Link to="/saved">
               <Menu.Item icon={<FaSave size={14} />}>Saved Jobs</Menu.Item>
+            </Link>
+            {/* Portfolio for students */}
+            <Link to="/portfolio">
+              <Menu.Item icon={<FaBriefcase size={14} />}>My Portfolio</Menu.Item>
             </Link>
           </>
         )}
@@ -234,6 +240,12 @@ export const Navbar = () => {
                         <Link to="/saved">
                           <Menu.Item icon={<FaSave size={14} />}>
                             Saved Jobs
+                          </Menu.Item>
+                        </Link>
+                        {/* Portfolio for students in mobile menu */}
+                        <Link to="/portfolio">
+                          <Menu.Item icon={<FaBriefcase size={14} />}>
+                            My Portfolio
                           </Menu.Item>
                         </Link>
                       </>

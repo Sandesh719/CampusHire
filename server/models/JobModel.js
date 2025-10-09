@@ -126,7 +126,7 @@ const JobSchema = new mongoose.Schema({
   },
   isApproved: {
     type: Boolean,
-    default: false
+    default: true
   },
 
   // overall status
