@@ -119,17 +119,24 @@ export const deleteApplication = async (req,res) => {
 // Get Application
 export const getApplication = async (req, res) => {
   try {
-    // Find application and populate related data
     const application = await Application.findById(req.params.id)
+      // --- populate job fields ---
       .populate({
         path: "job",
-        select:
-          "title companyName location experience employmentType category remoteType payType payMin payMax durationWeeks hoursPerWeek",
+        select: `
+          title companyName location experience category
+          employmentType remoteType payType payMin payMax
+          durationWeeks hoursPerWeek
+        `
       })
+      // --- populate applicant fields (student) ---
       .populate({
         path: "applicant",
-        select:
-          "name email college year skills portfolioLinks resume.url companyName companyDescription",
+        select: `
+          name email college year skills
+          bio portfolioLinks projects
+          resume
+        `,
       });
 
     if (!application) {
@@ -139,38 +146,19 @@ export const getApplication = async (req, res) => {
       });
     }
 
-    // Construct the response object explicitly to avoid leaking sensitive data.
+    /** Construct a clean structured response */
     const formatted = {
       _id: application._id,
       status: application.status,
       coverLetter: application.coverLetter || "",
-      portfolioLink: application.portfolioLink || "",
       expectedEarnings: application.expectedEarnings || 0,
-      availability: application.availability || {},
+      portfolioLink: application.portfolioLink || "",
       workSamples: application.workSamples || [],
-      applicantResume: application.applicantResume,
       createdAt: application.createdAt,
+      applicantResume: application.applicantResume,
+      availability: application.availability || {},
 
-      // Populated job info
-      job: application.job
-        ? {
-            _id: application.job._id,
-            title: application.job.title,
-            companyName: application.job.companyName,
-            location: application.job.location,
-            experience: application.job.experience,
-            employmentType: application.job.employmentType,
-            category: application.job.category,
-            remoteType: application.job.remoteType,
-            payType: application.job.payType,
-            payMin: application.job.payMin,
-            payMax: application.job.payMax,
-            durationWeeks: application.job.durationWeeks,
-            hoursPerWeek: application.job.hoursPerWeek,
-          }
-        : null,
-
-      // Populated applicant info
+      // Applicant (Student) details
       applicant: application.applicant
         ? {
             _id: application.applicant._id,
@@ -178,12 +166,30 @@ export const getApplication = async (req, res) => {
             email: application.applicant.email,
             college: application.applicant.college,
             year: application.applicant.year,
-            skills: application.applicant.skills,
-            portfolioLinks: application.applicant.portfolioLinks,
-            resume: application.applicant.resume,
-            companyName: application.applicant.companyName || "",
-            companyDescription:
-              application.applicant.companyDescription || "",
+            skills: application.applicant.skills || [],
+            bio: application.applicant.bio || "",
+            portfolioLinks: application.applicant.portfolioLinks || [],
+            projects: application.applicant.projects || [],
+            resume: application.applicant.resume || {},
+          }
+        : null,
+
+      // Job Details
+      job: application.job
+        ? {
+            _id: application.job._id,
+            title: application.job.title,
+            companyName: application.job.companyName,
+            location: application.job.location,
+            experience: application.job.experience,
+            category: application.job.category,
+            employmentType: application.job.employmentType,
+            remoteType: application.job.remoteType,
+            payType: application.job.payType,
+            payMin: application.job.payMin,
+            payMax: application.job.payMax,
+            durationWeeks: application.job.durationWeeks,
+            hoursPerWeek: application.job.hoursPerWeek,
           }
         : null,
     };

@@ -60,6 +60,14 @@ const UserSchema = new mongoose.Schema({
       type: String,
     },
   ],
+  projects: [
+    {
+      title: String,
+      description: String,
+      projectLink: String,
+      technologies: [String],
+    },
+  ],
   resume: {
     public_id: { type: String, required: false },
     url: { type: String, required: false },

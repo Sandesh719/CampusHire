@@ -7,7 +7,7 @@ import User from './routes/UserRoutes.js';
 import Job from './routes/JobRoutes.js'
 import Application from './routes/ApplicationRoutes.js';
 import Admin from './routes/AdminRoutes.js';
-import portfolioRoutes from './routes/PortfolioRoutes.js'; // ADD THIS IMPORT
+import portfolioRoutes from './routes/PortfolioRoutes.js'; 
 
 // --------------------------------------------------
 //  Load environment variables

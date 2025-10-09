@@ -156,9 +156,23 @@ export const getSingleApplication = async (req, res) => {
     }
 
     const application = await Application.findById(applicationId)
-      .populate({ path: 'job', populate: { path: 'postedBy', select: 'name companyName' } })
-      .populate({ path: 'applicant', select: '-password' });
-
+      .populate({
+        path: 'job',
+        populate: { path: 'postedBy', select: 'name companyName' }
+      })
+      .populate({
+        path: 'applicant',
+        select: `
+          name
+          email
+          college
+          year
+          bio
+          portfolioLinks
+          projects
+          resume
+        `
+      });
     if (!application) {
       return res.status(404).json({ success: false, message: 'Application not found' });
     }
@@ -171,7 +185,7 @@ export const getSingleApplication = async (req, res) => {
     if (!isApplicant && !isPoster) {
       return res.status(403).json({ success: false, message: 'Not authorized to view this application' });
     }
-
+    console.log("Fetched Application:", application);
     return res.status(200).json({
       success: true,
       application
