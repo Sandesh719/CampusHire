@@ -1,479 +1,362 @@
-import React, { useEffect, useState } from 'react'
-import { MetaData } from '../components/MetaData'
-import { useParams } from 'react-router'
-import { useDispatch, useSelector } from 'react-redux'
-import { Loader } from '../components/Loader'
-import { getJobData, updateJobData } from '../actions/AdminActions'
-import { Sidebar } from '../components/Sidebar'
-import { RxCross1 } from 'react-icons/rx'
-import { MdOutlineLocationOn, MdOutlineFeaturedPlayList, MdOutlineWorkOutline, MdWorkspacesOutline, MdAttachMoney, MdOutlineReceiptLong } from 'react-icons/md'
-import { BiImageAlt } from 'react-icons/bi'
-import { TbLoader2 } from 'react-icons/tb'
-import { BiBuilding } from 'react-icons/bi'
-import {toast} from 'react-toastify'
-
-
-
+import React, { useState, useEffect } from "react";
+import { MetaData } from "../components/MetaData";
+import { useDispatch, useSelector } from "react-redux";
+import { getJobData,updateJobData } from "../actions/AdminActions";
+import { toast } from "react-toastify";
+import { useNavigate, useParams } from "react-router-dom";
+import { TbLoader2 } from "react-icons/tb";
+import { Loader } from "../components/Loader";
 
 export const EditJobAdmin = () => {
+  const { id } = useParams();
+  const { me } = useSelector((state) => state.user || {});
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-    const { id } = useParams();
+  const { jobDetails, loading } = useSelector((state) => state.job);
 
-    const dispatch = useDispatch();
+  const [form, setForm] = useState({
+    title: "",
+    description: "",
+    location: "",
+    skillsRequired: "",
+    experience: "",
+    payType: "fixed",
+    payMin: "",
+    payMax: "",
+    category: "",
+    employmentType: "micro-gig",
+    durationWeeks: "",
+    hoursPerWeek: "",
+    remoteType: "remote",
+    eligibilityMinYear: "",
+    eligibilityMaxYear: "",
+    maxApplicants: "",
+    deadline: "",
+  });
 
-    const { loading, jobData } = useSelector(state => state.admin)
+  // Fetch the job details first
+  useEffect(() => {
+    dispatch(getJobData(id));
+  }, [dispatch, id]);
 
-    const [sideTog, setSideTog] = useState(false)
+  // Populate form once the job data is in Redux
+  useEffect(() => {
+    if (jobDetails && jobDetails._id === id) {
+      setForm({
+        title: jobDetails.title || "",
+        description: jobDetails.description || "",
+        location: jobDetails.location || "",
+        skillsRequired: jobDetails.skillsRequired?.join(", ") || "",
+        experience: jobDetails.experience || "",
+        payType: jobDetails.payType || "fixed",
+        payMin: jobDetails.payMin || "",
+        payMax: jobDetails.payMax || "",
+        category: jobDetails.category || "",
+        employmentType: jobDetails.employmentType || "micro-gig",
+        durationWeeks: jobDetails.durationWeeks || "",
+        hoursPerWeek: jobDetails.hoursPerWeek || "",
+        remoteType: jobDetails.remoteType || "remote",
+        eligibilityMinYear: jobDetails.eligibility?.minYear || "",
+        eligibilityMaxYear: jobDetails.eligibility?.maxYear || "",
+        maxApplicants: jobDetails.maxApplicants || "",
+        deadline: jobDetails.deadline
+          ? jobDetails.deadline.split("T")[0]
+          : "",
+      });
+    }
+  }, [jobDetails, id]);
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
 
-    const [title, setTitle] = useState(jobData.title);
-    const [description, setDescription] = useState(jobData.description);
-    const [companyName, setCompanyName] = useState(jobData.companyName);
-    const [location, setLocation] = useState(jobData.location);
-    const [skillsRequired, setSkillsRequired] = useState(jobData.skillsRequired);
-    const [experience, setExperience] = useState(jobData.experience);
-    const [salary, setSalary] = useState(jobData.salary);
-    const [category, setCategory] = useState(jobData.category);
-    const [employmentType, setEmploymentType] = useState(jobData.employmentType);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    const [logo, setLogo] = useState(jobData.companyLogo.url);
-    const [logoName, setLogoName] = useState("Select New Logo");
-
-
-
-
-
-
-    const logoChange = (e) => {
-        if (e.target.name === "logo") {
-            const reader = new FileReader();
-            reader.onload = () => {
-                if (reader.readyState === 2) {
-                    setLogo(reader.result);
-                    setLogoName(e.target.files[0].name)
-                }
-            };
-
-            reader.readAsDataURL(e.target.files[0]);
-        }
+    const { title, description } = form;
+    if (!title || !description) {
+      toast.error("Please fill title and description");
+      return;
     }
 
-
-    const postEditHandler = (e) => {
-        e.preventDefault();
-    }
-
-
-    useEffect(() => {
-        dispatch(getJobData(id))
-    }, [])
-
-   
-    
-    useEffect(()=>{
-        setTitle(jobData.title)
-        setDescription(jobData.description)
-        setCompanyName(jobData.companyName)
-        setLocation(jobData.location)
-        setSkillsRequired(jobData.skillsRequired)
-        setExperience(jobData.experience)
-        setSalary(jobData.salary)
-        setCategory(jobData.category)
-        setEmploymentType(jobData.employmentType)
-        setLogo(jobData.companyLogo.url)
-       
-    },[jobData])
-
-
-    const updateJobHandler = () => {
-        let skillsArr = skillsRequired ;
-        if(typeof(skillsRequired) === "string"){
-            skillsArr = skillsRequired.split(",") ;
-        }
-
-        if(logo.includes("cloudinary")){
-            toast.info("Please select new logo !")
-        }
-        else{
-            const updatedData = {
-                title,
-                companyName,
-                location,
-                skillsRequired:skillsArr,
-                experience,
-                salary,
-                category,
-                employmentType,
-                companyLogo:logo,
-                description
-            }
-    
-            dispatch(updateJobData(id,updatedData))
-        }
-        
-
-    }
-
-    return (
-        <>
-
-            <MetaData title="Edit Job Details" />
-            <div className='bg-gray-950 min-h-screen pt-14 md:px-20 px-3 text-white'>
-                {
-                    loading ? <Loader /> :
-
-                        <div>
-                            <div className="pt-1 fixed left-0 z-20 pl-0">
-                                <div onClick={(() => setSideTog(!sideTog))} className='cursor-pointer blueCol px-3 py-2' size={44} >
-                                    {!sideTog ? "Menu" : <RxCross1 />}
-                                </div>
-                            </div>
-
-                            <Sidebar sideTog={sideTog} />
-                            <div className=' flex justify-center w-full items-start pt-6'>
-
-
-                                <form onSubmit={postEditHandler} className=' md:flex hidden  shadow-gray-700  w-full md:mx-0 mx-8' action="">
-                                    <div className='flex flex-col w-full justify-start items-start pt-4 gap-3'>
-                                        <div className='text-4xl pb-1 font-medium border-b border-gray-500 w-full'>
-                                            Edit Job Details
-                                        </div>
-                                        <div className='flex gap-3 pt-3'>
-                                            {/* Job Title */}
-                                            <div className='bg-white flex justify-center items-center'>
-                                                <div className='text-gray-600 px-2'>
-                                                    <MdOutlineWorkOutline size={20} />
-                                                </div>
-                                                <input
-                                                    value={title} onChange={(e) => setTitle(e.target.value)}
-                                                    required placeholder='Job Title' type="text" className='outline-none bold-placeholder w-full text-black px-1 pr-3 py-2' />
-                                            </div>
-
-
-
-                                            {/* Company Name */}
-                                            <div className='bg-white flex justify-center items-center'>
-                                                <div className='text-gray-600 px-2'>
-                                                    <BiBuilding size={20} />
-                                                </div>
-                                                <input
-                                                    value={companyName} onChange={(e) => setCompanyName(e.target.value)}
-                                                    required placeholder='Company Name' type="text" className='outline-none bold-placeholder w-full text-black px-1 pr-3 py-2' />
-                                            </div>
-
-
-
-                                            {/* Company Logo */}
-                                            <div>
-                                                <div className='bg-white flex w-[15.2rem] justify-center items-center'>
-                                                    <div className='text-gray-600 px-2'>
-                                                        {
-                                                            logo.length !== 0 ?
-                                                                <img src={logo} className='w-[3em]' alt="" /> :
-                                                                <BiImageAlt size={20} />
-                                                        }
-                                                    </div>
-                                                    <label htmlFor='logo' className='outline-none w-full cursor-pointer text-black px-1 pr-3 py-2 '>
-                                                        {logoName.length === 0 ? <span className='text-gray-500 font-medium'>Select Company Logo...</span>
-                                                            : logoName}
-                                                    </label>
-                                                    <input id='logo' name='logo' required
-                                                        onChange={logoChange}
-                                                        placeholder='Logo' accept="image/*" type="file" className='outline-none  w-full hidden text-black px-1 pr-3 py-2' />
-
-
-                                                </div>
-                                                {/* <p className='bg-gray-950 text-white text-xs'>Please select Image file</p> */}
-                                            </div>
-
-                                        </div>
-                                        <div className='flex gap-3'>
-                                            {/* Experience */}
-                                            <div className='bg-white flex justify-center items-center'>
-                                                <div className='text-gray-600 px-2'>
-                                                    <MdOutlineReceiptLong size={20} />
-                                                </div>
-                                                <input
-                                                    value={experience} onChange={(e) => setExperience(e.target.value)}
-                                                    required placeholder='Experience' type="text" className='outline-none bold-placeholder w-full text-black px-1 pr-3 py-2' />
-                                            </div>
-
-
-                                            {/* Location */}
-                                            <div className='bg-white flex justify-center items-center'>
-                                                <div className='text-gray-600 px-2'>
-                                                    <MdOutlineLocationOn size={20} />
-                                                </div>
-                                                <input
-                                                    value={location} onChange={(e) => setLocation(e.target.value)}
-                                                    required placeholder='Location' type="text" className='outline-none bold-placeholder w-full text-black px-1 pr-3 py-2' />
-                                            </div>
-
-
-                                            {/* Salary */}
-                                            <div className='bg-white flex justify-center items-center'>
-                                                <div className='text-gray-600 px-2'>
-                                                    <MdAttachMoney size={20} />
-                                                </div>
-
-                                                <input
-                                                    value={salary} onChange={(e) => setSalary(e.target.value)}
-                                                    required placeholder='Salary' type="text" className='outline-none bold-placeholder w-full text-black px-1 pr-3 py-2' />
-                                            </div>
-                                        </div>
-
-                                        <div className='flex w-[48rem] gap-3'>
-                                            {/* Job Description */}
-                                            <div className='bg-white w-full flex justify-center items-center'>
-                                                <div className='text-gray-600 md:pb-12 pb-8 px-2'>
-                                                    <MdOutlineFeaturedPlayList size={20} />
-                                                </div>
-                                                <textarea
-                                                    value={description}
-                                                    onChange={(e) => setDescription(e.target.value)}
-                                                    placeholder='Job Description' type="text" className='outline-none w-full text-black bold-placeholder px-1 pr-3 py-2' />
-                                            </div>
-
-                                        </div>
-
-                                        <div className='flex gap-3 w-[48rem]'>
-                                            {/* Skills Required */}
-                                            <div className='bg-white w-full flex justify-center items-center'>
-                                                <div className='text-gray-600 md:pb-12 pb-8 px-2'>
-                                                    <MdWorkspacesOutline size={20} />
-                                                </div>
-                                                <textarea
-                                                    value={skillsRequired} onChange={(e) => setSkillsRequired(e.target.value)}
-                                                    placeholder='Required Skills' type="text" className='outline-none w-full text-black bold-placeholder px-1 pr-3 py-2' />
-                                            </div>
-
-                                        </div>
-                                        <div className='flex gap-3'>
-                                            {/* Category */}
-                                            <div className='bg-white flex justify-center items-center'>
-
-
-                                                <select required onChange={(e) => setCategory(e.target.value)} 
-                                                value={category} name="" id="large" className="block w-full px-6 py-2 text-base text-gray-900 border border-gray-300  bg-gray-50 dark:bg-white dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-900 ">
-                                                    <option selected value="">Select Category</option>
-                                                    <option value="Technology">Technology</option>
-                                                    <option value="Marketing">Marketing</option>
-                                                    <option value="Finance">Finance</option>
-                                                    <option value="Sales">Sales</option>
-                                                    <option value="Legal">Legal</option>
-                                                </select>
-                                            </div>
-
-
-                                            {/* Employment Type */}
-                                            <div className='bg-white flex justify-center items-center'>
-
-
-                                                <select required onChange={(e) => setEmploymentType(e.target.value)} value={employmentType} name="" id="large" className="block w-full px-6 py-2 text-base text-gray-900 border border-gray-300  bg-gray-50 dark:bg-white dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-900 ">
-                                                    <option selected value="">Select Employment Type</option>
-                                                    <option value="full-time">Full-time</option>
-                                                    <option value="part-time">Part-time</option>
-                                                    <option value="contract">Contract</option>
-                                                    <option value="internship">Internship</option>
-                                                </select>
-
-
-
-
-                                            </div>
-
-
-                                        </div>
-                                        <div className='flex w-full'>
-
-                                            <button onClick={()=>updateJobHandler()} className='blueCol w-[20rem] justify-center items-center flex px-4 py-2'>
-                                                {loading ? <TbLoader2 className='animate-spin' size={24} /> : "Edit Job"}
-                                            </button>
-
-                                        </div>
-
-
-                                    </div>
-
-                                </form>
-
-
-
-
-                                <form onSubmit={postEditHandler} className=' md:hidden flex md:w-1/3 shadow-gray-700  w-full md:mx-0 mx-8' action="">
-
-                                    <div className='md:px-10 px-2 pt-4 pb-20 w-full flex flex-col gap-4'>
-                                        <div className='text-center border-gray-500 border-b'>
-                                            <p className='text-4xl  font-medium'>Edit Job Details</p>
-                                        </div>
-
-                                        {/* Job Title */}
-                                        <div className='bg-white flex justify-center items-center'>
-                                            <div className='text-gray-600 px-2'>
-                                                <MdOutlineWorkOutline size={20} />
-                                            </div>
-                                            <input
-                                                value={title} onChange={(e) => setTitle(e.target.value)}
-                                                required placeholder='Job Title' type="text" className='outline-none bold-placeholder w-full text-black px-1 pr-3 py-2' />
-                                        </div>
-
-
-
-                                        {/* Job Description */}
-                                        <div className='bg-white flex justify-center items-center'>
-                                            <div className='text-gray-600 md:pb-12 pb-8 px-2'>
-                                                <MdOutlineFeaturedPlayList size={20} />
-                                            </div>
-                                            <textarea
-                                                value={description}
-                                                onChange={(e) => setDescription(e.target.value)}
-                                                placeholder='Job Description' type="text" className='outline-none w-full text-black bold-placeholder px-1 pr-3 py-2' />
-                                        </div>
-
-
-
-                                        {/* Company Name */}
-                                        <div className='bg-white flex justify-center items-center'>
-                                            <div className='text-gray-600 px-2'>
-                                                <BiBuilding size={20} />
-                                            </div>
-                                            <input
-                                                value={companyName} onChange={(e) => setCompanyName(e.target.value)}
-                                                required placeholder='Company Name' type="text" className='outline-none bold-placeholder w-full text-black px-1 pr-3 py-2' />
-                                        </div>
-
-
-
-                                        {/* Company Logo */}
-                                        <div>
-                                            <div className='bg-white flex justify-center items-center'>
-                                                <div className='text-gray-600 px-2'>
-                                                    {
-                                                        logo.length !== 0 ?
-                                                            <img src={logo} className='w-[3em]' alt="" /> :
-                                                            <BiImageAlt size={20} />
-                                                    }
-                                                </div>
-                                                <label htmlFor='logo' className='outline-none w-full cursor-pointer text-black px-1 pr-3 py-2 '>
-                                                    {logoName.length === 0 ? <span className='text-gray-500 font-medium'>Select Company Logo...</span>
-                                                        : logoName}
-                                                </label>
-                                                <input id='logo' name='logo' required
-                                                    onChange={logoChange}
-                                                    placeholder='Logo' accept="image/*" type="file" className='outline-none  w-full hidden text-black px-1 pr-3 py-2' />
-
-
-                                            </div>
-                                        </div>
-
-
-
-                                        {/* Location */}
-                                        <div className='bg-white flex justify-center items-center'>
-                                            <div className='text-gray-600 px-2'>
-                                                <MdOutlineLocationOn size={20} />
-                                            </div>
-                                            <input
-                                                value={location} onChange={(e) => setLocation(e.target.value)}
-                                                required placeholder='Location' type="text" className='outline-none bold-placeholder w-full text-black px-1 pr-3 py-2' />
-                                        </div>
-
-                                        {/* Skills Required */}
-                                        <div className='bg-white flex justify-center items-center'>
-                                            <div className='text-gray-600 md:pb-12 pb-8 px-2'>
-                                                <MdWorkspacesOutline size={20} />
-                                            </div>
-                                            <textarea
-                                                value={skillsRequired} onChange={(e) => setSkillsRequired(e.target.value)}
-                                                placeholder='Required Skills' type="text" className='outline-none w-full text-black bold-placeholder px-1 pr-3 py-2' />
-                                        </div>
-
-
-                                        {/* Experience */}
-                                        <div className='bg-white flex justify-center items-center'>
-                                            <div className='text-gray-600 px-2'>
-                                                <MdOutlineReceiptLong size={20} />
-                                            </div>
-                                            <input
-                                                value={experience} onChange={(e) => setExperience(e.target.value)}
-                                                required placeholder='Experience' type="text" className='outline-none bold-placeholder w-full text-black px-1 pr-3 py-2' />
-                                        </div>
-
-
-                                        {/* Category */}
-                                        <div className='bg-white flex justify-center items-center'>
-
-
-                                            <select required onChange={(e) => setCategory(e.target.value)} 
-                                            value={category} name="" id="large" className="block w-full px-6 py-2 text-base text-gray-900 border border-gray-300  bg-gray-50 dark:bg-white dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-900 ">
-                                                <option selected value="">Select Category</option>
-                                                <option value="Technology">Technology</option>
-                                                <option value="Marketing">Marketing</option>
-                                                <option value="Finance">Finance</option>
-                                                <option value="Sales">Sales</option>
-                                                <option value="Legal">Legal</option>
-                                            </select>
-                                        </div>
-
-
-                                        {/* Salary */}
-                                        <div className='bg-white flex justify-center items-center'>
-                                            <div className='text-gray-600 px-2'>
-                                                <MdAttachMoney size={20} />
-                                            </div>
-
-                                            <input
-                                                value={salary} onChange={(e) => setSalary(e.target.value)}
-                                                required placeholder='Salary' type="text" className='outline-none bold-placeholder w-full text-black px-1 pr-3 py-2' />
-
-                                        </div>
-
-
-                                        {/* Employment Type */}
-                                        <div className='bg-white flex justify-center items-center'>
-
-
-                                            <select required onChange={(e) => setEmploymentType(e.target.value)} value={employmentType} name="" id="large" className="block w-full px-6 py-2 text-base text-gray-900 border border-gray-300  bg-gray-50 dark:bg-white dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-900 ">
-                                                <option selected value="">Select Employment Type</option>
-                                                <option value="full-time">Full-time</option>
-                                                <option value="part-time">Part-time</option>
-                                                <option value="contract">Contract</option>
-                                                <option value="internship">Internship</option>
-                                            </select>
-
-
-
-
-                                        </div>
-
-
-
-
-
-
-
-
-
-                                        <div>
-                                            <button onClick={()=>updateJobHandler()} disabled={loading} className='blueCol flex justify-center items-center px-8 w-full py-2 font-semibold' >
-                                                {loading ? <TbLoader2 className='animate-spin' size={24} /> : 
-                                                "Edit Job"}</button>
-                                        </div>
-
-                                    </div>
-
-
-
-                                </form>
-
-                            </div>
-
-                        </div>
-                }
-
+    const payload = {
+      ...form,
+      companyName: me?.companyName,
+      skillsRequired: form.skillsRequired
+        ? form.skillsRequired.split(",").map((s) => s.trim()).filter(Boolean)
+        : [],
+      payMin: form.payMin ? Number(form.payMin) : 0,
+      payMax: form.payMax ? Number(form.payMax) : 0,
+      durationWeeks: form.durationWeeks ? Number(form.durationWeeks) : 0,
+      hoursPerWeek: form.hoursPerWeek ? Number(form.hoursPerWeek) : 0,
+      eligibility: {
+        minYear: form.eligibilityMinYear
+          ? Number(form.eligibilityMinYear)
+          : undefined,
+        maxYear: form.eligibilityMaxYear
+          ? Number(form.eligibilityMaxYear)
+          : undefined,
+      },
+      maxApplicants: form.maxApplicants
+        ? Number(form.maxApplicants)
+        : undefined,
+    };
+
+    await dispatch(updateJobData(id, payload));
+    toast.success("Job updated successfully!");
+    navigate("/admin/myJobs");
+  };
+
+  if (loading) return <Loader />;
+
+  return (
+    <>
+      <MetaData title={`Edit Job | ${form.title}`} />
+      <div className="bg-gray-950 min-h-screen pt-14 md:px-20 px-4 text-white">
+        <div className="max-w-5xl mx-auto pb-12">
+          <h1 className="text-3xl font-semibold mb-6">Edit Job</h1>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Job Title */}
+            <div>
+              <label className="block text-sm text-gray-300 mb-1">Job Title</label>
+              <input
+                name="title"
+                value={form.title}
+                onChange={handleChange}
+                required
+                placeholder="e.g. Frontend Developer"
+                className="w-full px-3 py-2 text-black rounded outline-none"
+              />
             </div>
 
+            {/* Description */}
+            <div>
+              <label className="block text-sm text-gray-300 mb-1">Description</label>
+              <textarea
+                name="description"
+                value={form.description}
+                onChange={handleChange}
+                required
+                rows="5"
+                className="w-full px-3 py-2 text-black rounded outline-none resize-y"
+              />
+            </div>
 
-        </>
-    )
-}
+            {/* Row 1 */}
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm text-gray-300 mb-1">Location</label>
+                <input
+                  name="location"
+                  value={form.location}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 text-black rounded outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-300 mb-1">Category</label>
+                <input
+                  name="category"
+                  value={form.category}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 text-black rounded outline-none"
+                />
+              </div>
+            </div>
+
+            {/* Row 2 */}
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm text-gray-300 mb-1">Experience</label>
+                <input
+                  name="experience"
+                  value={form.experience}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 text-black rounded outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-300 mb-1">
+                  Employment Type
+                </label>
+                <select
+                  name="employmentType"
+                  value={form.employmentType}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 text-black rounded outline-none"
+                >
+                  <option value="micro-gig">Micro-gig</option>
+                  <option value="freelance">Freelance</option>
+                  <option value="internship">Internship</option>
+                  <option value="part-time">Part-time</option>
+                  <option value="contract">Contract</option>
+                  <option value="full-time">Full-time</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Row 3 */}
+            <div className="grid md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm text-gray-300 mb-1">Pay Type</label>
+                <select
+                  name="payType"
+                  value={form.payType}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 text-black rounded outline-none"
+                >
+                  <option value="fixed">Fixed</option>
+                  <option value="hourly">Hourly</option>
+                  <option value="stipend">Stipend</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm text-gray-300 mb-1">Pay Min</label>
+                <input
+                  name="payMin"
+                  value={form.payMin}
+                  onChange={handleChange}
+                  type="number"
+                  className="w-full px-3 py-2 text-black rounded outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-300 mb-1">Pay Max</label>
+                <input
+                  name="payMax"
+                  value={form.payMax}
+                  onChange={handleChange}
+                  type="number"
+                  className="w-full px-3 py-2 text-black rounded outline-none"
+                />
+              </div>
+            </div>
+
+            {/* Remote Type & Duration */}
+            <div className="grid md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm text-gray-300 mb-1">Remote Type</label>
+                <select
+                  name="remoteType"
+                  value={form.remoteType}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 text-black rounded outline-none"
+                >
+                  <option value="remote">Remote</option>
+                  <option value="on-site">On-site</option>
+                  <option value="hybrid">Hybrid</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm text-gray-300 mb-1">
+                  Duration (weeks)
+                </label>
+                <input
+                  name="durationWeeks"
+                  value={form.durationWeeks}
+                  onChange={handleChange}
+                  type="number"
+                  className="w-full px-3 py-2 text-black rounded outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-300 mb-1">Hours / Week</label>
+                <input
+                  name="hoursPerWeek"
+                  value={form.hoursPerWeek}
+                  onChange={handleChange}
+                  type="number"
+                  className="w-full px-3 py-2 text-black rounded outline-none"
+                />
+              </div>
+            </div>
+
+            {/* Skills */}
+            <div>
+              <label className="block text-sm text-gray-300 mb-1">
+                Skills Required (comma separated)
+              </label>
+              <input
+                name="skillsRequired"
+                value={form.skillsRequired}
+                onChange={handleChange}
+                className="w-full px-3 py-2 text-black rounded outline-none"
+              />
+            </div>
+
+            {/* Eligibility */}
+            <div className="grid md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm text-gray-300 mb-1">
+                  Eligibility Min Year
+                </label>
+                <input
+                  name="eligibilityMinYear"
+                  value={form.eligibilityMinYear}
+                  onChange={handleChange}
+                  type="number"
+                  className="w-full px-3 py-2 text-black rounded outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-300 mb-1">
+                  Eligibility Max Year
+                </label>
+                <input
+                  name="eligibilityMaxYear"
+                  value={form.eligibilityMaxYear}
+                  onChange={handleChange}
+                  type="number"
+                  className="w-full px-3 py-2 text-black rounded outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-300 mb-1">Max Applicants</label>
+                <input
+                  name="maxApplicants"
+                  value={form.maxApplicants}
+                  onChange={handleChange}
+                  type="number"
+                  className="w-full px-3 py-2 text-black rounded outline-none"
+                />
+              </div>
+            </div>
+
+            {/* Deadline */}
+            <div>
+              <label className="block text-sm text-gray-300 mb-1">Deadline</label>
+              <input
+                name="deadline"
+                value={form.deadline}
+                onChange={handleChange}
+                type="date"
+                className="w-full px-3 py-2 text-black rounded outline-none"
+              />
+            </div>
+
+            {/* Submit */}
+            <div className="pt-6 flex gap-3">
+              <button
+                type="submit"
+                disabled={loading}
+                className="blueCol px-6 py-2 rounded font-semibold inline-flex items-center gap-2"
+              >
+                {loading ? <TbLoader2 className="animate-spin" size={18} /> : "Update Job"}
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate("/admin/myJobs")}
+                className="px-5 py-2 border border-gray-600 rounded text-gray-300"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </>
+  );
+};

@@ -45,8 +45,8 @@ export const createJob = async (req, res) => {
       title,
       description,
       companyName,
-      location,
-      logo, // optional: data URI / url / {public_id,url}
+      companyLogo,
+       location,
       skillsRequired,
       experience,
       // new pay fields
@@ -131,18 +131,6 @@ export const createJob = async (req, res) => {
       skills = skillsRequired.split(',').map(s => s.trim()).filter(Boolean);
     }
 
-    // Upload logo (optional)
-    let logoData = null;
-    try {
-      logoData = await uploadIfData(logo, 'company_logos');
-    } catch (e) {
-      // fail gracefully with message
-      return res.status(400).json({
-        success: false,
-        message: 'Could not upload company logo: ' + e.message
-      });
-    }
-
     // Upload attachments array (optional)
     const attachmentsArr = [];
     if (attachments && Array.isArray(attachments) && attachments.length > 0) {
@@ -162,7 +150,7 @@ export const createJob = async (req, res) => {
       title,
       description,
       companyName,
-      companyLogo: logoData || undefined,
+      companyLogo,
       location: location || undefined,
       skillsRequired: skills,
       experience: experience || undefined,

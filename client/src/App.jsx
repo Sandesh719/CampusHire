@@ -35,10 +35,12 @@ import { Test } from './pages/Test'
 import NotFound from './pages/NotFound'
 import UnAuthorized from './pages/UnAuthorized'
 import ScrollToTopWhenRouteChanges from './components/ScrollToTopOnRouteChange.jsx'
-import { Portfolio } from './pages/Portfolio' // Add this import
+
+// Use the components that already exist under src/pages
+import { MyPostedJobs } from './pages/MyPostedJobs'
+import { ViewJobApplicants } from './pages/ViewJobApplicants'
 
 function App() {
-
   const dispatch = useDispatch()
 
   const { isLogin } = useSelector(state => state.user)
@@ -53,7 +55,7 @@ function App() {
       dispatch(getAllJobs())
     }
     LogOrNot()
-  }, []);
+  }, [dispatch]);
 
   const ProtectedRoute = ({ isAllowed, redirectPath = '/unauthorized', children }) => {
     if (!isAllowed) {
@@ -62,12 +64,16 @@ function App() {
     return children ? children : <Outlet />
   }
 
+  const isAdmin = () => localStorage.getItem('role') === 'recruiter' || localStorage.getItem('role') === 'admin'
+  const isStudentOrAdmin = () => ['student', 'admin','recruiter'].includes(localStorage.getItem('role'))
+
   return (
     <>
       <ScrollToTopWhenRouteChanges/>
       <Navbar />
       <Routes>
-        
+
+        {/* Public */}
         <Route exact path='/' element={<Home />} />
         <Route path='/jobs' element={<Jobs />} />
         <Route path='/contact' element={<Contact />} />
@@ -76,7 +82,8 @@ function App() {
         <Route path='/register' element={<Register />} />
         <Route path='/details/:id' element={<JobDetails />} />
 
-        <Route element={<ProtectedRoute isAllowed={['student', 'admin'].includes(localStorage.getItem('role'))} />}>
+        {/* Protected: student + admin */}
+        <Route element={<ProtectedRoute isAllowed={isStudentOrAdmin()} />}>
           <Route path='/profile' element={<MyProfile />} />
           <Route path='/applied' element={<AppliedJobs />} />
           <Route path='/saved' element={<SavedJobs />} />
@@ -86,11 +93,10 @@ function App() {
           <Route path='/JobsLayout' element={<JobsLayout />} />
           <Route path='/Application/:id' element={<Application />} />
           <Route path='/Application/Details/:id' element={<ApplicationDetails />} />
-          {/* Add Portfolio route here - inside ProtectedRoute for students */}
-          <Route path='/portfolio' element={<Portfolio />} />
         </Route>
 
-        <Route element={<ProtectedRoute isAllowed={"admin" === localStorage.getItem('role')} />}>
+        {/* Protected: admin / recruiter */}
+        <Route element={<ProtectedRoute isAllowed={isAdmin()} />}>
           <Route path='/admin/dashboard' element={<Dashboard />} />
           <Route path='/admin/postJob' element={<CreateJob />} />
           <Route path='/admin/allJobs' element={<ViewAllJobAdmin />} />
@@ -98,14 +104,19 @@ function App() {
           <Route path='/admin/allUsers' element={<ViewAllUsersAdmin />} />
           <Route path='/admin/update/application/:id' element={<EditAppAdmin />} />
           <Route path='/admin/user/role/:id' element={<EditUserAdmin />} />
-          <Route path='/admin/job/details/:id' element={<EditJobAdmin />} />
+          <Route path='/admin/job/update/:id' element={<EditJobAdmin />} />
+
+          {/* recruiter-focused routes (existing files in your pages folder) */}
+          <Route path='/admin/myJobs' element={<MyPostedJobs />} />
+          <Route path='/admin/job/:id/applicants' element={<ViewJobApplicants />} />
         </Route>
 
         {/* test */}
         <Route path='/test' element={<Test />} />
 
-        <Route path='*' element={<NotFound />} />
+        {/* fallback */}
         <Route path='/unauthorized' element={<UnAuthorized />} />
+        <Route path='*' element={<NotFound />} />
 
       </Routes>
 
@@ -120,7 +131,7 @@ function App() {
         draggable
         pauseOnHover
         theme="dark"
-        className="mt-14 font-bold  "
+        className="mt-14 font-bold"
       />
 
       <Footer />

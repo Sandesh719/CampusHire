@@ -124,3 +124,26 @@ export const getSavedJobs = () => async (dispatch) => {
     toast.error(message)
   }
 }
+
+export const getMyJobs = () => async (dispatch) => {
+  try {
+    dispatch(allJobsRequest());
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+      },
+    };
+
+    const { data } = await axios.get(`${API_BASE_URL}/admin/myJobs`, config);
+    // Backend returns: { success, count, jobs: [...] }
+    const myJobs = data.jobs || [];
+    dispatch(allJobsSuccess(myJobs));
+  } catch (err) {
+    const message =
+      err.response?.data?.message ||
+      "Unable to fetch your jobs. Please try again later.";
+    dispatch(allJobsFail(message));
+    toast.error(message);
+  }
+};

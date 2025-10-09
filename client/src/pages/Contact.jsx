@@ -39,14 +39,16 @@ export const Contact = () => {
 
             <Card
               title="Address"
+              
               content="CampusHire, khar, Mumbai, 123, India"
             />
             <Card
               title="Email"
               content={[
-                "General Inquiries: info@ampushire.com",
-                "Support: support@campushire.com",
-                "Job Applications: jobs@campushire.com",
+                "General Inquiries: info@CampusHire.com",
+                "Support: support@CampusHire.com",
+                "Job Applications: jobs@CampusHire.com",
+                
               ]}
             />
             <Card

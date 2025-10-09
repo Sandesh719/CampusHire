@@ -170,17 +170,71 @@ export const isLogin = async (req, res) => {
 
 export const me = async (req, res) => {
   try {
-    // Exclude password from the returned user
-    const user = await User.findById(req.user._id).select('-password');
+    // Find user, exclude password
+    const user = await User.findById(req.user._id)
+      .select("-password")
+      .populate({
+        path: "savedJobs",
+        select: "title companyName employmentType category remoteType",
+      })
+      .populate({
+        path: "appliedJobs",
+        select: "status createdAt job",
+        populate: {
+          path: "job",
+          select: "title companyName employmentType category",
+        },
+      });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Structure response, ensuring both roles get the fields they need
+    const baseUser = {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      avatar: user.avatar,
+      createdAt: user.createdAt,
+      bio: user.bio || "",
+      contactNumber: user.contactNumber || "",
+    };
+
+    let profileData = {};
+
+    if (user.role === "student") {
+      profileData = {
+        college: user.college || "",
+        year: user.year || null,
+        skills: user.skills || [],
+        portfolioLinks: user.portfolioLinks || [],
+        resume: user.resume || { public_id: "", url: "" },
+        savedJobs: user.savedJobs || [],
+        appliedJobs: user.appliedJobs || [],
+      };
+    } else if (user.role === "recruiter") {
+      profileData = {
+        companyName: user.companyName || "",
+        companyDescription: user.companyDescription || "",
+        verifiedRecruiter: user.verifiedRecruiter || false,
+        postedJobs: user.postedJobs || [], // optional, if you track it
+      };
+    }
 
     res.status(200).json({
       success: true,
-      user
+      user: { ...baseUser, ...profileData },
     });
   } catch (err) {
+    console.error("me() error:", err);
     res.status(500).json({
       success: false,
-      message: err.message
+      message: err.message || "Server error retrieving user profile",
     });
   }
 };
