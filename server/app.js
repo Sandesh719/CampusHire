@@ -7,15 +7,12 @@ import User from './routes/UserRoutes.js';
 import Job from './routes/JobRoutes.js'
 import Application from './routes/ApplicationRoutes.js';
 import Admin from './routes/AdminRoutes.js';
+import portfolioRoutes from './routes/PortfolioRoutes.js'; // ADD THIS IMPORT
+
 // --------------------------------------------------
 //  Load environment variables
 // --------------------------------------------------
 dotenv.config({ path: './config/config.env' });
-
-// --------------------------------------------------
-//  Configure Cloudinary once globally
-// --------------------------------------------------
-
 
 // --------------------------------------------------
 //  Core Express middlewares
@@ -42,6 +39,7 @@ app.use('/api/v1', User);
 app.use('/api/v1', Job);
 app.use('/api/v1', Application);
 app.use('/api/v1', Admin);
+app.use('/api/v1', portfolioRoutes); // ADD THIS LINE
 
 // --------------------------------------------------
 //  Simple health endpoint

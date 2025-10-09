@@ -22,6 +22,7 @@ export const Register = () => {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [skills, setSkills] = useState("")
+  const [isSkillsOpen, setIsSkillsOpen] = useState(false)
 
   // student fields
   const [college, setCollege] = useState("")
@@ -99,6 +100,20 @@ export const Register = () => {
   useEffect(() => {
     if (isLogin) navigate("/")
   }, [isLogin])
+
+  // Add this useEffect to close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.relative')) {
+        setIsSkillsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   return (
     <>
@@ -192,13 +207,82 @@ export const Register = () => {
                     <p className='bg-gray-950 text-white text-xs'>Resume (optional)</p>
                   </div>
 
-                  {/* Skills */}
-                  <div className='bg-white flex justify-center items-center'>
-                    <div className='text-gray-600 md:pb-12 pb-8 px-2'>
-                      <MdOutlineFeaturedPlayList size={20} />
+                  {/* Skills - Custom Dropdown */}
+                  <div className="relative">
+                    <div
+                      className="bg-white flex justify-between items-center px-3 py-2 cursor-pointer border border-gray-300 rounded"
+                      onClick={() => setIsSkillsOpen(!isSkillsOpen)}
+                    >
+                      <div className="flex items-center">
+                        <div className='text-gray-600 pr-2'>
+                          <MdOutlineFeaturedPlayList size={20} />
+                        </div>
+                        <span className={skills ? 'text-black' : 'text-gray-500'}>
+                          {skills ? `Selected ${skills.split(',').filter(skill => skill.trim() !== '').length} skills` : 'Select skills...'}
+                        </span>
+                      </div>
+                      <span className={`text-gray-600 transform transition-transform ${isSkillsOpen ? 'rotate-180' : ''}`}>
+                        ▼
+                      </span>
                     </div>
-                    <textarea value={skills} onChange={(e) => setSkills(e.target.value)} placeholder='Skills (comma separated)' type="text" className='outline-none w-full text-black bold-placeholder px-1 pr-3 py-2' />
+
+                    {isSkillsOpen && (
+                      <div className="absolute z-10 w-full bg-white border border-gray-300 max-h-48 overflow-y-auto mt-1 shadow-lg rounded ">
+                        {[
+                          "JavaScript", "Python", "Java", "C++", "React", "Node.js",
+                          "HTML", "CSS", "MongoDB", "SQL", "Git", "AWS", "Docker",
+                          "Machine Learning", "Data Analysis", "UI/UX Design",
+                          "Project Management", "Communication", "Problem Solving"
+                        ].map((skill, index) => {
+                          const isSelected = skills.split(',').map(s => s.trim()).includes(skill);
+                          return (
+                            <div
+                              key={index}
+                              className={`px-3 py-2 cursor-pointer hover:bg-gray-100 flex items-center text-black ${isSelected ? 'bg-yellow-100' : ''
+                                }`}
+                              onClick={() => {
+                                const currentSkills = skills.split(',').filter(s => s.trim() !== '');
+                                if (isSelected) {
+                                  setSkills(currentSkills.filter(s => s !== skill).join(','));
+                                } else {
+                                  setSkills([...currentSkills, skill].join(','));
+                                }
+                              }}
+                            >
+                              <span className={`w-4 h-4 border border-gray-400 mr-2 flex items-center justify-center ${isSelected ? 'bg-yellow-400 border-yellow-400' : ''}`}>
+                                {isSelected && '✓'}
+                              </span>
+                              {skill}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
+
+                  {/* Display selected skills */}
+                  {skills.split(',').filter(skill => skill.trim() !== '').length > 0 && (
+                    <div className='flex flex-wrap gap-2'>
+                      {skills.split(',').filter(skill => skill.trim() !== '').map((skill, index) => (
+                        <span
+                          key={index}
+                          className='bg-yellow-400 text-black px-2 py-1 rounded text-sm flex items-center gap-1'
+                        >
+                          {skill.trim()}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const currentSkills = skills.split(',').filter(s => s.trim() !== '' && s !== skill);
+                              setSkills(currentSkills.join(','));
+                            }}
+                            className="text-black hover:text-red-600 text-xs"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </>
               )}
 

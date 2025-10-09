@@ -41,7 +41,7 @@ export const Footer = () => {
           <div className="flex flex-col justify-center items-center pt-5">
             <p className="titleT text-2xl flex justify-center items-center">
               {" "}
-              <MdOutlineBusinessCenter /> JOBLANE
+              <MdOutlineBusinessCenter /> CampusHire
             </p>
             <p className="text-sm text-gray-300">
               Giving best opportunities to best peoples.

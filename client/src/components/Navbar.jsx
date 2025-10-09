@@ -5,7 +5,7 @@ import { FaBars } from 'react-icons/fa';
 import { RxCross1 } from 'react-icons/rx';
 import { MdOutlineBusinessCenter, MdOutlineDashboard } from 'react-icons/md';
 import { Menu } from '@mantine/core';
-import { FaUserCircle, FaSave } from 'react-icons/fa';
+import { FaUserCircle, FaSave, FaBriefcase } from 'react-icons/fa';
 import { MdDoneAll } from 'react-icons/md';
 import { RiLogoutBoxFill } from 'react-icons/ri';
 import { toast } from 'react-toastify';
@@ -21,7 +21,6 @@ export const Navbar = () => {
     const [toggle, setToggle] = useState(false);
     const dispatch = useDispatch();
     const navigate = useNavigate();
-
 
     const isMobile = useIsMobile()
 
@@ -46,6 +45,8 @@ export const Navbar = () => {
                     <Link to="/jobs" className='cool-link'>Gigs</Link>
                     <Link to='/contact' className='cool-link'>Contact</Link>
                     <Link to='/about' className='cool-link'>About</Link>
+                    {/* Add My Portfolio as a navbar item */}
+                    <Link to='/portfolio' className='cool-link'>My Portfolio</Link>
 
                     {isLogin ? (
                         <Menu shadow="md" width={200}>
@@ -117,6 +118,8 @@ export const Navbar = () => {
                         <Link onClick={() => setToggle(!toggle)} to="/jobs" className='cool-link'>Jobs</Link>
                         <Link onClick={() => setToggle(!toggle)} to='/contact' className='cool-link'>Contact</Link>
                         <Link onClick={() => setToggle(!toggle)} to='/about' className='cool-link'>About</Link>
+                        {/* Add My Portfolio to mobile menu */}
+                        <Link onClick={() => setToggle(!toggle)} to='/portfolio' className='cool-link'>My Portfolio</Link>
                     </ul>
                 </div>
             </div>

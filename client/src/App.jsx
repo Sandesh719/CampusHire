@@ -35,23 +35,17 @@ import { Test } from './pages/Test'
 import NotFound from './pages/NotFound'
 import UnAuthorized from './pages/UnAuthorized'
 import ScrollToTopWhenRouteChanges from './components/ScrollToTopOnRouteChange.jsx'
-
-
+import { Portfolio } from './pages/Portfolio' // Add this import
 
 function App() {
 
   const dispatch = useDispatch()
 
-
   const { isLogin } = useSelector(state => state.user)
 
-
   useEffect(() => {
-
     dispatch(me());
-
   }, [dispatch, isLogin]);
-
 
   useEffect(() => {
     const LogOrNot = () => {
@@ -59,21 +53,18 @@ function App() {
       dispatch(getAllJobs())
     }
     LogOrNot()
-
   }, []);
 
   const ProtectedRoute = ({ isAllowed, redirectPath = '/unauthorized', children }) => {
     if (!isAllowed) {
       return <Navigate to={redirectPath} replace />;
     }
-
     return children ? children : <Outlet />
   }
 
-
   return (
     <>
-       <ScrollToTopWhenRouteChanges/>
+      <ScrollToTopWhenRouteChanges/>
       <Navbar />
       <Routes>
         
@@ -95,7 +86,8 @@ function App() {
           <Route path='/JobsLayout' element={<JobsLayout />} />
           <Route path='/Application/:id' element={<Application />} />
           <Route path='/Application/Details/:id' element={<ApplicationDetails />} />
-
+          {/* Add Portfolio route here - inside ProtectedRoute for students */}
+          <Route path='/portfolio' element={<Portfolio />} />
         </Route>
 
         <Route element={<ProtectedRoute isAllowed={"admin" === localStorage.getItem('role')} />}>
@@ -109,18 +101,13 @@ function App() {
           <Route path='/admin/job/details/:id' element={<EditJobAdmin />} />
         </Route>
 
-
         {/* test */}
         <Route path='/test' element={<Test />} />
-
 
         <Route path='*' element={<NotFound />} />
         <Route path='/unauthorized' element={<UnAuthorized />} />
 
-
-
       </Routes>
-
 
       <ToastContainer
         position="top-right"
@@ -134,14 +121,9 @@ function App() {
         pauseOnHover
         theme="dark"
         className="mt-14 font-bold  "
-
       />
 
       <Footer />
-
-
-
-
     </>
   )
 }
