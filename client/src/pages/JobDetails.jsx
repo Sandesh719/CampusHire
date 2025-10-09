@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import { MetaData } from '../components/MetaData'
 import { Loader } from '../components/Loader'
 import { useDispatch, useSelector } from 'react-redux'
 import { getSingleJob, saveJob } from '../actions/JobActions'
 import { BiBriefcase, BiBuildings, BiRupee } from 'react-icons/bi'
-import { AiOutlineSave } from 'react-icons/ai'
+import { AiOutlineSave, AiOutlineArrowLeft } from 'react-icons/ai'
 import { HiStatusOnline } from 'react-icons/hi'
 import { BsPersonWorkspace, BsSend } from 'react-icons/bs'
 import { TbLoader2 } from 'react-icons/tb'
@@ -16,28 +16,24 @@ export const JobDetails = () => {
   const { id } = useParams()
   const navigate = useNavigate()
 
-  const { jobDetails, loading, saveJobLoading } = useSelector((state) => state.job)
-  const { me, isLogin } = useSelector((state) => state.user)
-
+  const { jobDetails, loading, saveJobLoading } = useSelector(state => state.job)
+  const { me, isLogin } = useSelector(state => state.user)
   const job = jobDetails
 
   useEffect(() => {
     dispatch(getSingleJob(id))
   }, [dispatch, id])
 
-  const convertDateFormat = (inputDate) => {
+  const convertDateFormat = inputDate => {
     const parts = inputDate.split('-')
     if (parts.length !== 3) return 'Invalid date format'
-
     const [year, month, day] = parts
     return `${day}-${month}-${year}`
   }
 
-  const saveJobHandler = () => {
-    dispatch(saveJob(id))
-  }
+  const saveJobHandler = () => dispatch(saveJob(id))
 
-  const notLoginHandler = (actionText) => {
+  const notLoginHandler = actionText => {
     if (!isLogin) {
       toast.info(`Please login to ${actionText} a gig`)
       navigate('/login')
@@ -53,11 +49,26 @@ export const JobDetails = () => {
         ) : (
           <>
             {job && (
-              <div>
+              <div className="relative">
+                {/* ---- Back Button ---- */}
+                <div className="pt-5 pb-2 md:px-12 pl-4">
+                  <button
+                    onClick={() => navigate('/jobs')}
+                    className="flex items-center gap-2 text-sm md:text-base bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-md font-semibold"
+                  >
+                    <AiOutlineArrowLeft size={18} />
+                    Back to Gigs
+                  </button>
+                </div>
+
                 <div className="flex pt-5 md:px-12 pl-4 md:gap-10 gap-5">
                   <div className="flex items-center w-[6rem]">
                     {job.companyLogo?.url && (
-                      <img src={job.companyLogo.url} alt="company logo" />
+                      <img
+                        src={job.companyLogo.url}
+                        alt="company logo"
+                        className="w-full object-contain"
+                      />
                     )}
                   </div>
 
@@ -86,7 +97,7 @@ export const JobDetails = () => {
                   </div>
                 </div>
 
-                <div className="border-b pt-2 pb-3 md:mx-12 mx-4"></div>
+                <div className="border-b pt-2 pb-3 md:mx-12 mx-4" />
 
                 <div className="md:px-12 pl-4">
                   <p className="text-2xl py-3">Details:</p>
@@ -162,7 +173,6 @@ export const JobDetails = () => {
 
                 {/* ---- Action Buttons ---- */}
                 <div className="md:px-12 pl-4 flex gap-8 pb-32 pt-6">
-                  {/* Apply Button */}
                   <button
                     onClick={() => {
                       if (!isLogin) {
@@ -184,11 +194,12 @@ export const JobDetails = () => {
                       me?.role === 'recruiter' || me?.appliedJobs?.includes(job?._id)
                     }
                   >
-                    <BsSend />{' '}
-                    {me?.appliedJobs?.includes(job?._id) ? 'Applied' : 'Apply'}
+                    <BsSend />
+                    {me?.appliedJobs?.includes(job?._id)
+                      ? 'Applied'
+                      : 'Apply'}
                   </button>
 
-                  {/* Save Button */}
                   <button
                     onClick={() => {
                       if (isLogin) saveJobHandler()
