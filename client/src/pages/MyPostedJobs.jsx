@@ -46,13 +46,13 @@ export const MyPostedJobs = () => {
 
         {allJobs && allJobs.length === 0 ? (
           <div className="text-center text-gray-400 mt-12">
-            You haven’t posted any jobs yet.
+            You haven’t posted any gigs yet.
             <br />
             <Link
-              to="/recruiter/create-job"
+              to="/admin/postJob"
               className="text-blue-400 hover:underline"
             >
-              Post your first job →
+              Post your first gig →
             </Link>
           </div>
         ) : (

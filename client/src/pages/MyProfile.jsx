@@ -1,15 +1,13 @@
-import React, { useEffect, useState } from "react";
 import { MetaData } from "../components/MetaData";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { Loader } from "../components/Loader";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useDisclosure } from "@mantine/hooks";
 import { Modal } from "@mantine/core";
 
 export const MyProfile = () => {
   const { loading, me } = useSelector((state) => state.user);
   const [opened, { open, close }] = useDisclosure(false);
-  const navigate = useNavigate();
 
   const convertDateFormat = (inputDate) => {
     if (!inputDate) return "--";

@@ -78,7 +78,7 @@ const UserSchema = new mongoose.Schema({
   },
   verifiedRecruiter: {
     type: Boolean,
-    default: false,
+    default: true,
   },
 
   // --- Common for both ---

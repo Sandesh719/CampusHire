@@ -17,7 +17,7 @@ export const Register = () => {
 
   const [eyeTog, setEyeTog] = useState(false)
 
-  const [role, setRole] = useState('student') // default student
+  const [role, setRole] = useState('student')
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -204,7 +204,7 @@ export const Register = () => {
                         type="file"
                         className='outline-none hidden w-full text-black px-1 pr-3 py-2' />
                     </div>
-                    <p className='bg-gray-950 text-white text-xs'>Resume (optional)</p>
+                    <p className='bg-gray-950 text-white text-xs'>Resume</p>
                   </div>
 
                   {/* Skills - Custom Dropdown */}
@@ -293,7 +293,7 @@ export const Register = () => {
                     <input value={companyName} onChange={(e) => setCompanyName(e.target.value)} required placeholder='Company / Organization name' type="text" className='outline-none bold-placeholder w-full text-black px-1 pr-3 py-2' />
                   </div>
                   <div className='bg-white flex justify-center items-center'>
-                    <textarea value={companyDescription} onChange={(e) => setCompanyDescription(e.target.value)} placeholder='Short company description (optional)' className='outline-none w-full text-black px-1 pr-3 py-2' />
+                    <textarea value={companyDescription} onChange={(e) => setCompanyDescription(e.target.value)} placeholder='Short company description' className='outline-none w-full text-black px-1 pr-3 py-2' />
                   </div>
                 </>
               )}
@@ -307,7 +307,7 @@ export const Register = () => {
                       : <CgProfile size={20} />}
                   </div>
                   <label htmlFor='avatar' className='outline-none w-full cursor-pointer text-black px-1 pr-3 py-2 '>
-                    {avatarName ? avatarName : <span className='text-gray-500 font-medium'>Select Profile Pic (optional)...</span>}
+                    {avatarName ? avatarName : <span className='text-gray-500 font-medium'>Select Profile Pic...</span>}
                   </label>
                   <input
                     id='avatar' name='avatar'
@@ -317,7 +317,7 @@ export const Register = () => {
                     className='outline-none w-full hidden text-black px-1 pr-3 py-2'
                   />
                 </div>
-                <p className='bg-gray-950 text-white text-xs'>Profile image (optional)</p>
+                <p className='bg-gray-950 text-white text-xs'>Profile image</p>
               </div>
 
               <div>

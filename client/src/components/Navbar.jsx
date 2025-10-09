@@ -1,5 +1,5 @@
 // src/components/Navbar.jsx
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Avatar, Menu } from '@mantine/core';
 import { FaBars } from 'react-icons/fa';
@@ -109,7 +109,7 @@ export const Navbar = () => {
           <>
             <Link to="/admin/myJobs">
               <Menu.Item icon={<MdDoneAll size={14} />}>
-                My Posted Jobs
+                My Posted Gigs
               </Menu.Item>
             </Link>
           </>
